@@ -1,0 +1,105 @@
+﻿@model WISModels.ExternalClientModel
+
+
+@if (Model != null)
+{
+    using (Html.BeginForm("SaveExtClientdtls", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmEditDetails" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            @Html.HiddenFor(p => p.ExternalClientID)
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @*<div class="form-row">
+                <div class="form-group col-md-4">
+                    <label class="control-label col-xs-4 ">Email</label>                 
+                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })                  
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label col-xs-4 ">FirstName</label>                   
+                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })                    
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="control-label col-xs-4 ">LastName</label>                   
+                        @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })                 
+                </div>
+            </div>*@
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">FirstName</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">LastName</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">Email</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">Employer</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.Employer, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Employer, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">Address</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">City</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.City, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.City, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">Province/State</label>
+                <div class="col-md-8">
+                    @*@Html.TextBoxFor(model => model.State, new { @class = "form-control" })*@
+                    @Html.DropDownListFor(model => model.State, ViewBag.State as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.State, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">Postal/Zip Code</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.Zip, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Zip, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnSave" type="submit">Save Client</button>
+                <button class="btn btn-primary" id="btnclose" data-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+     }
+}
+else
+{
+    <h4>No Data Found</h4>
+}

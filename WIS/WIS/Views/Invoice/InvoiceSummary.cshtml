@@ -1,0 +1,154 @@
+﻿@model WISModels.InvoiceModel
+@{
+    ViewBag.Title = "Invoice Summary";
+    
+  }
+<br /><br /><br />
+
+<div class="row">
+    <div class="col-md-6">
+        <strong><span>Hoar Construction Warehouse<br />
+        550 Belview Street<br />
+        Bessemer AL 35020<br />
+        United States</span></strong>
+    </div>
+    <div class="col-md-6">
+        <img src="~/Content/img/HOAR_logo.png"  class="visible-lg  visible-md pull-right" style="width:50% ;height:50%"/>      
+        @*<img src="~/Content/img/PrimaryLogoSm.png" class="visible-lg  visible-md pull-right" style="width:50% ;height:50%" />*@
+    </div>
+</div>
+
+<div>
+    @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+    {
+        @Html.AntiForgeryToken()
+        if (Model != null)
+        {
+            var result = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
+            var Status = Model.InvoiceStatus;
+            @Html.HiddenFor(p => p.InvoiceID)
+            if (Model.InvoiceID > 0)
+            {
+                var job = Model.InvoiceJobNumber;
+                if (job == "NULL")
+                {
+                    <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
+                }
+                else
+                {
+                    <div id="JobAddress" class="col-md-6">
+                        <p><strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                           
+                        </p>
+                    </div>
+
+                }
+
+                <div class="row">
+                    <div>
+                        <b><span><strong>Invoice#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceID </strong></span></b>
+                    </div>
+                    <div>
+                        <b><span><strong>Invoice Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceDate.ToString("MM/dd/yyyy")</strong></span></b>
+                    </div>
+                    <div>
+                        <b><span class="col-md-offset-6"><strong>Balance Due&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $@Model.InvoiceTotal </strong></span></b>
+                    </div>
+                </div>
+
+            }
+            <br />
+            <div class="table-responsive">
+                <table id="table_id" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Unit Cost</th>
+                            <th>CostCode/GLCode</th>
+                            <th>Quantity</th>
+                            <th>LineTotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            var m = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
+                            foreach (var item in Model.InvoiceDetails)
+                            {
+                        <tr>
+                            <td>@item.ItemInventoryID</td>
+                            @if (result == true)
+                            {
+                                <td>@item.NonInventoryItem</td>
+                            }
+                            else
+                            {
+                                <td>@item.ItemInventoryDescription</td>
+                            }
+                            <td>@item.ItemInventoryUnitCost</td>
+                            <td>@item.InvoiceDetailCostCodeGL</td>
+                            <td>@item.InvoiceDetailQuantity</td>
+                            <td>@item.InvoiceDetailLineItemTotal</td>
+                        </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <b>
+                    <span class="col-md-offset-9">
+                        <strong>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Model.InvoiceTotal
+                        </strong>
+                    </span>
+                </b>
+                <b>
+                    <span class="col-md-offset-9">
+                        <strong>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amount Paid  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;0.00
+                        </strong>
+                    </span>
+                </b>
+               <br/>
+               <div class="container">
+                   <div class="col-md-8"></div>
+                   &nbsp;&nbsp;&nbsp;<div class="col-md-3">
+                       <table id="table_id1" class="table table-striped table-bordered">
+                           <thead>
+                               <tr>
+                                   <th>Balance Due(USD)</th>
+                                   <th> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;$@Model.InvoiceTotal</th>
+                               </tr>
+                           </thead>
+                       </table>
+                   </div>
+
+                   @*<span class="col-md-offset-9">
+                       <strong class="table table-striped">
+                           &nbsp;Balance Due(USD)  &nbsp;&nbsp;&nbsp;$@Model.InvoiceTotal
+                       </strong>
+                   </span>*@
+
+               </div>
+                   
+               
+            </div>
+            <br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br />
+            <div class="row">
+                Terms: <strong>@Model.InvoiceTerms</strong>
+            </div>
+            <br /><br />
+            <div class="row">
+                Notes:<strong>@Model.InvoiceNotes</strong>
+            </div>
+        }
+    }
+</div>

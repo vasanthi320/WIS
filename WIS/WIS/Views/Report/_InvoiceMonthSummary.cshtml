@@ -1,0 +1,27 @@
+﻿@model WISModels.InvoiceSummary
+    <div></div>
+<div class="col-md-8">
+    <div class="panel panel-primary">
+        <div class="panel-heading"> Outstanding Invoices</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3">
+                    @if (Model != null)
+                    {
+                        <strong>$ @Math.Round(Model.InvoiceSummaryTotalAll, 2)</strong><br />
+                        <span>Total Outstanding(USD)</span>
+                    }
+                </div>
+                <div class="col-md-4">
+                    @if (Model != null)
+                    {
+                        <span>0 - 30 days old : $@Math.Round(Model.InvoiceSummaryTotal0To30, 2)</span><br />
+                        <span>31 - 60 days old : $@Math.Round(Model.InvoiceSummaryTotal31To60, 2)</span><br />
+                        <span>61 - 90 days old : $@Math.Round(Model.InvoiceSummaryTotal61To90, 2)</span><br />
+                        <span>over 90 days old : $@Math.Round(Model.InvoiceSummaryTotal91Plus, 2)</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
