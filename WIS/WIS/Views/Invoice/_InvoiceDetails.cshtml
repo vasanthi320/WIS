@@ -61,21 +61,7 @@
     <script src="~/Scripts/bootstrap-datepicker.js"></script>
     <script type="text/javascript">
 
-      function AddProdItem() {
-            var loc = $("#Location").val();
-            var loadurl = '@Url.Action("PopupAddInvoiceItem", "Invoice")'+"?Location="+loc;
-            $("#divbody").html("Content loading please wait...");
-            $("#myModalLabel").html("Add Invoice Details");
-
-            $.ajax(loadurl, {
-            cache: false,
-            success: function (data, textStatus, jqXHR) {
-            $("#divbody").html(data);
-            $("#myModal").modal("show");
-            },
-            dataType: "html"
-            });
-      }
+     
 
     </script>
     }

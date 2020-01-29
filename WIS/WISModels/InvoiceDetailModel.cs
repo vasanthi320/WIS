@@ -21,7 +21,7 @@ namespace WISModels
         [Required(ErrorMessage = "CostCode/GLCode is Required")]
         public string InvoiceDetailCostCodeGL { get; set; }
         public Nullable<int> ItemCategoryID { get; set; }
-       // public string ItemCategory { get; set; }
+        public int LocID { get; set; }
         public string Categories { get; set; }
         public string Inventory { get; set; }
         public string NonInventoryItem { get; set; }

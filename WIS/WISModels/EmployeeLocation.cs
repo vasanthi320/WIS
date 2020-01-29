@@ -10,6 +10,7 @@ namespace WISModels
     {
         public int EmployeeID { get; set; }
         public int LocationID { get; set; }
+        public string LocatonDescription { get; set; }
         public bool UseAllAsDefault { get; set; }
         public string email { get; set; }
     }

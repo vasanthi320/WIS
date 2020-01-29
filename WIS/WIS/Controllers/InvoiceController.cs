@@ -41,57 +41,87 @@ namespace WIS.Controllers
         public ActionResult EditInvoice(int InvoiceId)
         {
             var service = new WISService();
-            HttpContext.Session["Invoice"] = null;           
-            string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
-            loc = loc == "All" ? "Bessemer" : loc;
+            HttpContext.Session["Invoice"] = null;
+            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
+            //loc = loc == "All" ? "Bessemer" : loc;
+            var useremail = GetUserEmail(User.Identity.Name);
+            var empdetails = service.GetEmployeeDetails().Where(p => p.Email == useremail).SingleOrDefault().EmployeeID;
+            var emp = service.GetEmpLocation(empdetails);
+            var Emplocation = emp != null ? emp.LocationID : 1;
+
             var model = service.GetInvoiceDetails(InvoiceId);
             ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
             ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job.ToString() }).ToList();
             ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString() }).ToList();
             ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
             ViewBag.Location = service.GetLocationList().
-               Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString(), Selected = p.LocationDescription == loc }).ToList();
+               Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString()}).ToList();
             ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
             if (model.InvoiceID > 0)
             {
                 // HttpContext.Session["Invoice"] = model;
                 return View("editInvoice", model);
             }
+            model.LocationID = Emplocation;
             return View("AddInvoiceItem", model);
         }
         public ActionResult AddnewInvoice(string mesg = "")
         {
             var service = new WISService();
             ViewBag.Result = mesg;
-            string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
-            loc = loc == "All" ? "Bessemer" : loc;                   
+            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
+           
+           // loc = loc == "All" ? "Bessemer" : loc;                   
             ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString() }).ToList();
+
+            var useremail = GetUserEmail(User.Identity.Name);
+            var empdetails = service.GetEmployeeDetails().Where(p=>p.Email==useremail).SingleOrDefault().EmployeeID;
+            var emp = service.GetEmpLocation(empdetails);
+            var Emplocation = emp !=null? emp.LocationID : 1;
             ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
-            ViewBag.Location = service.GetLocationList().
-                Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString(), Selected = p.LocationDescription == loc }).ToList();
+
+            ViewBag.Location = service.GetLocationList().Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString() }).ToList();
+           
+            
             ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
             var model = HttpContext.Session["Invoice"] as InvoiceModel ?? new InvoiceModel();
-            model.InvoiceDetails = model.InvoiceDetails ?? new List<InvoiceDetailModel>();           
-            model.ClientTypeID = 2;           
+            model.InvoiceDetails = model.InvoiceDetails ?? new List<InvoiceDetailModel>();            
+            model.ClientTypeID = 2;
+            model.LocationID = Emplocation;
             return View("AddInvoiceItem", model);
             
+        }
+     
+        public SelectList ToSelectList(List<LocationModel> loclist)
+        {
+            var service = new WISService();
+            List<SelectListItem> list = new List<SelectListItem>();
+            var tblloc = service.GetLocationList();
+            string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
+            loc = loc == "All" ? "Bessemer" : loc;
+            foreach (LocationModel p in loclist)
+            {
+                list.Add(new SelectListItem()
+                {
+                    Text = p.LocationDescription,
+                    Value = Convert.ToString(p.LocationID)
+                });
+            }
+
+            return new SelectList(list, "Value", "Text");
         }
         public ActionResult PopupAddInvoiceItem(int Location)
         {
             var service = new WISService();
             var model = new InvoiceDetailModel();
-            //  string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));        
-
-            //ViewBag.Location = service.GetLocationList().
-            //    Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString(), Selected = p.LocationDescription == loc }).ToList();        
+            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name)); 
             //ViewBag.Inventory = service.GetInventoryData().Where(x => x.ItemInventoryQuantity != 0 && x.LocationID == Location).Select(p => new SelectListItem { Text = p.ItemInventoryDescription, Value = p.ItemInventoryID.ToString() + "|" + p.ItemInventorySalesPrice + "|" + p.ItemInventoryQuantity }).ToList();
             var Inventorylst = new List<SelectListItem>();            
             Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
             Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });                    
-            ViewBag.Inventory = Inventorylst;
-            //model.Inventory ="Yes";
+            ViewBag.Inventory = Inventorylst;            
            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
-            // var item = new InvoiceDetailModel { InvoiceDetailID = -1 };
+           
             return View("_popupInvoiceItem", model);
         }
         public ActionResult EditPopupAddInvoiceItem(int Location)
@@ -110,7 +140,7 @@ namespace WIS.Controllers
             return View("_editpopupInvoiceItem", model);
         }
         [HttpPost]
-        public ActionResult AddInvoiceItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText)
+        public ActionResult AddInvoiceItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText,int locaton)
         {
             var lst = HttpContext.Session["Invoice"] as InvoiceModel ?? new InvoiceModel();           
             if (lst.InvoiceDetails == null)
@@ -121,9 +151,10 @@ namespace WIS.Controllers
             lst.InvoiceTotal = GetTotal(lst);
             ViewBag.Total = lst.InvoiceTotal;
             HttpContext.Session["Invoice"] = lst;
+            lst.LocationID = locaton;
             return View("_InvoiceDetails", lst.InvoiceDetails);
         }
-        public ActionResult AddInvoiceItems1(int Id, int qty, decimal price, string CGCode, string itm1)
+        public ActionResult AddInvoiceItems1(int Id, int qty, decimal price, string CGCode, string itm1, int InvoiceId)
         {
             var lst = HttpContext.Session["Invoice"] as InvoiceModel ?? new InvoiceModel();
             if (lst.InvoiceDetails == null)
@@ -519,6 +550,13 @@ namespace WIS.Controllers
             var service = new WISService();
             var model = service.GetInventoryDataById(Id);
             return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult UpdateInvoiceStatus(int Id, string InvStatus)
+        {
+            var service = new WISService();
+            var model = service.UpdateInvoiceStatus(Id, InvStatus);            
+            return RedirectToAction("Invoices", "Invoice");
         }
     }
 }

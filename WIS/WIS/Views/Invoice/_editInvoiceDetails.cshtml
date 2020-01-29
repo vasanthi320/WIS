@@ -9,7 +9,7 @@
 @Html.HiddenFor(p => p.InvoiceDetailID)
 @Html.HiddenFor(p => p.InvoiceID)
 @Html.HiddenFor(m => m.ItemCategoryID)
-@Html.HiddenFor(m => m.NonInventoryItem)
+@*@Html.HiddenFor(m => m.NonInventoryItem)*@
 <div class="form-horizontal">
 
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -174,7 +174,7 @@
         }
 
         function AddProdItem() {
-            var loc = $("#Location").val();
+            var loc = $("#LocationID").val();
             var InvoiceID = $("#InvoiceID").val()
          var loadurl = '@Url.Action("PopupAddInvoiceItem", "Invoice")'+"?Location="+loc;
             //var loadurl = "/EditInvoice/PopupAddInvoiceItem" + "?InvoiceId" + InvoiceID
@@ -191,7 +191,7 @@
             });
         }
              function editAddProdItem() {
-            var loc = $("#Location").val();
+            var loc = $("#LocationID").val();
             var InvoiceID = $("#InvoiceID").val()
          var loadurl = '@Url.Action("EditPopupAddInvoiceItem", "Invoice")'+"?Location="+loc;
             //var loadurl = "/EditInvoice/PopupAddInvoiceItem" + "?InvoiceId" + InvoiceID

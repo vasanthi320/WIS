@@ -200,6 +200,7 @@
     </Compile>
     <Compile Include="Models\Helper.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\LocationViewmodel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

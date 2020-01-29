@@ -143,7 +143,9 @@
                         @Html.AntiForgeryToken()
                         if (Model != null)
                         {
+                            var result = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
                             var Status = Model.InvoiceStatus;
+                            
                             @Html.HiddenFor(p => p.InvoiceID)
                             if (Model.InvoiceID > 0)
                             {
@@ -191,15 +193,23 @@
                                     <tbody>
                                         @if (Model != null)
                                         {
+                                            var m = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
                                             foreach (var item in Model.InvoiceDetails)
                                             {
-                                                <tr>
-                                                    <td>@item.ItemInventoryID</td>
-                                                    <td>@item.ItemInventoryDescription</td>
-                                                    <td>@item.ItemInventoryUnitCost</td>
-                                                    <td>@item.InvoiceDetailQuantity</td>
-                                                    <td>@item.InvoiceDetailLineItemTotal</td>
-                                                </tr>
+                                        <tr>
+                                            <td>@item.ItemInventoryID</td>
+                                            @if (result == true)
+                                            {
+                                                <td>@item.NonInventoryItem</td>
+                                            }
+                                            else
+                                            {
+                                                <td>@item.ItemInventoryDescription</td>
+                                            }
+                                            <td>@item.ItemInventoryUnitCost</td>
+                                            <td>@item.InvoiceDetailQuantity</td>
+                                            <td>@item.InvoiceDetailLineItemTotal</td>
+                                        </tr>
                                             }
                                         }
 

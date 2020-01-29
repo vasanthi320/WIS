@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace WISModels
 {
   public  class InvoiceModel
@@ -28,8 +29,10 @@ namespace WISModels
         //public List<InvoiceModel> InvoiceModelDtls { get; set; }
         public List<InvoiceDetailModel> InvoiceDetails { get; set; }
         public List<EmployeeModel> empdetails { get; set; }
-     
+        public List<LocationModel> Locationdetails { get; set; }
+        public int LocationID { get; set; }
         public string Location { get; set; }
+        public virtual IEnumerable<LocationModel> locationlist { get; set; }
         public Nullable<int> ExternalClientID { get; set; }
         public List<JobModel> JobDetails { get; set; }
 

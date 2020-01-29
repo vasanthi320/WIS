@@ -16,7 +16,8 @@
 {
     @Html.HiddenFor(p => p.InvoiceID)
     @Html.HiddenFor(p => p.Project)
-    @Html.HiddenFor(p => p.InvoiceStatus)   
+    @Html.HiddenFor(p => p.InvoiceStatus)
+    @Html.HiddenFor(m => m.InvoiceDetails.FirstOrDefault().NonInventoryItem)
     @Html.AntiForgeryToken()
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
@@ -38,7 +39,7 @@
         <div class="form-group" id="Locationdiv">
             <label class="control-label col-xs-3 ">Stock Location</label>
             <div class="col-sm-7">
-                @Html.DropDownListFor(model => model.Location, ViewBag.Location as IEnumerable<SelectListItem>, new { Class = "form-control" })
+                @Html.DropDownListFor(model => model.LocationID, ViewBag.Location as IEnumerable<SelectListItem>, new { Class = "form-control" })
                 @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -97,7 +98,7 @@
         <button id="AddButtonId" type="button" class="btn btn-success" onclick="javascript:editAddProdItem()">Add Line&nbsp;<span class="glyphicon glyphicon-plus"></span></button>&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
     </div>
-   
+
     <br /> <br /> <br />
     <br /> <br /> <br />
     <div class="col-md-12 form-inline" style="text-align:center">
@@ -118,7 +119,7 @@
     </div>
     <br /> <br /> <br />
     <br /> <br /> <br /> <br /> <br /> <br />
-    <br /> <br /> <br /> <br /> <br /> <br />   
+    <br /> <br /> <br /> <br /> <br /> <br />
     <div>
         <button class="btn btn-primary" id="btnSave" value="Draft" type="submit" onclick="javascript:SubmitInvoice('D')">Save as Draft</button>
         <button class="btn btn-primary" id="btnSave" value="Account" type="submit" onclick="javascript:SubmitInvoice('A')">Send to Accounting</button>
@@ -156,7 +157,7 @@
             }
             $('.Datepicker').datepicker("setDate", new Date());
 
-            $('.Datepicker').datepicker();            
+            $('.Datepicker').datepicker();
 
             $("#InvoiceJobNumber").autocomplete({
                 source: function (request, response) {
@@ -208,9 +209,9 @@
                 $("#extclientdiv").show();
             }
         }
-       
+
         function AddProdItem() {
-            var loc = $("#Location").val();
+            var loc = $("#LocationID").val();
             var InvoiceID = $("#InvoiceID").val()
          var loadurl = '@Url.Action("PopupAddInvoiceItem", "Invoice")'+"?Location="+loc;
             //var loadurl = "/EditInvoice/PopupAddInvoiceItem" + "?InvoiceId" + InvoiceID
@@ -227,7 +228,7 @@
             });
         }
              function editAddProdItem() {
-            var loc = $("#Location").val();
+                 var loc = $("#LocationID").val();
             var InvoiceID = $("#InvoiceID").val()
          var loadurl = '@Url.Action("EditPopupAddInvoiceItem", "Invoice")'+"?Location="+loc;
             //var loadurl = "/EditInvoice/PopupAddInvoiceItem" + "?InvoiceId" + InvoiceID
@@ -236,7 +237,7 @@
 
             $.ajax(loadurl, {
                 cache: false,
-                success: function (data, textStatus, jqXHR) {                    
+                success: function (data, textStatus, jqXHR) {
                     $("#divbody").html(data);
                     $("#myModal").modal("show");
                 },
@@ -259,7 +260,7 @@
             }
         }
 
-      
+
         function PopulateItmTotal() {
             var item = $('#ItemInventoryUnitCost').val();
             Maxqty = parseInt($('#InvoiceDetailQuantity').val());
@@ -281,8 +282,9 @@
                 type: "Post",
                 cache: false,
                 data: data,
-                success: function (result, textStatus, jqXHR) {
-                    $("#dvDetails").html(result);
+                success: function (data, textStatus, jqXHR) {
+                    $("#dvDetails").html(data);
+                    $("#NonInventoryItem").html(data.NonInventoryItem);
                     $("#myModal").modal("hide");
                 }
             });
@@ -295,12 +297,13 @@
             var descp = $('#ItemInventoryID option:selected').text();
             var categ = $("#ItemCategoryID option:selected").val();
             var catTxt = $("#ItemCategoryID option:selected").text();
+            var loca = $("#LocationID").val();
             var loadurl = '@Url.Action("AddInvoiceItems", "Invoice")';
 
             $.ajax(loadurl, {
                 type: "Post",
                 cache: false,
-                data: { Id: Id, qty: qnty, price: price, CGCode: Code, desc: descp, cat: categ, catText: catTxt},
+                data: { Id: Id, qty: qnty, price: price, CGCode: Code, desc: descp, cat: categ, catText: catTxt,locaton:loca},
                 success: function (data, textStatus, jqXHR) {
                     $("#dvDetails").html(data);
                     $("#myModal").modal("hide");
@@ -327,14 +330,14 @@
                 }
             });
         }
-        function SaveItem1foredit() { 
+        function SaveItem1foredit() {
             var InvoiceID = $("#InvoiceID").val()
             var price = $('#ItemInventoryUnitCost').val();
             var qnty = parseInt($('#InvoiceQuantity').val());
-            var Code = $('#InvoiceDetailCostCodeGL').val();            
+            var Code = $('#InvoiceDetailCostCodeGL').val();
             var it1 = $('#NonInventoryItem').val();
             var loadurl = '@Url.Action("EditAddInvoiceItems1", "Invoice")';
-          
+
             $.ajax(loadurl, {
                 type: "Post",
                 cache: false,
@@ -347,7 +350,7 @@
             });
         }
         function EditInvoiceDtl(InvoiceDetailID) {
-            debugger;
+            //debugger;
             $('#InvoiceDetailQuantity').val("");
             $("#InvoiceDetailLineItemTotal").val("");
             var loadurl = '@Url.Action("EditInvoiceDetailItem", "Invoice")' + "?InvoiceDetailID=" + InvoiceDetailID;
@@ -412,8 +415,26 @@
                 }
             });
         }
+
+        //function SubmitInvoice(type) {            
+        //    $("#InvoiceStatus").val(type);
+        //}
         function SubmitInvoice(type) {
-            $("#InvoiceStatus").val(type);
+            
+             var url = '@Url.Action("UpdateInvoiceStatus", "Invoice")';
+            $("#InvoiceStatus").val(type);           
+                $.ajax({
+                    type: "Post",
+                    url: url,
+                    data: JSON.stringify({ Id: @Model.InvoiceID, InvStatus: type }),
+                    contentType: "application/json",
+                    success: function (result) {
+                        location.href = '@Url.Action("Invoices", "Invoice")'
+                    },
+                    error: function (xhr) {
+                        console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                    }
+                });  
         }
         function InventoryDtls() {
             var itm = $('#Inventory option:selected').val();

@@ -10,6 +10,15 @@
 <div class="row pull-right">
     <button id="AddButtonId" class="btn btn-success" onclick="javascript:NewInvoice()">NewInvoice&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
 </div>
+<style>
+    #invoice_id {
+        word-wrap: break-word;
+      
+    }
+    table.table-striped thead tr th {
+        word-wrap: break-word;        
+    }
+</style>
 <br /><br />
       <div>
           @Html.HiddenFor(p => p.FirstOrDefault().InvoiceID)
@@ -49,6 +58,7 @@
                                       <td>@item.InvoiceStatus</td>
                                       <td>
                                           @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
+                                          <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
                                           @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
                                       </td>
                                   </tr>
@@ -104,6 +114,7 @@
                                       <td>
                                           @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
                                           <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                                          @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
                                       </td>
                                   </tr>
                               }
@@ -155,21 +166,12 @@
 
             $('.Datepicker').datepicker();
         });
-         //Add new item
-        @*function NewInvoice() {
-            var loadurl = '@Url.Action("AddnewInvoice", "Home")';
-            $("#divbody").html("Content loading please wait...");
-            $("#myModalLabel").html(" Add Invoice");
-
-            $.ajax(loadurl, {
-                cache: false,
-                success: function (data, textStatus, jqXHR) {
-                    $("#divbody").html(data);
-                    $("#myModal").modal("show");
-                },
-                dataType: "html"
-            });
-        }*@
+       
+         
+       
+     
+        
+        
         function NewInvoice() {
    var loadurl = '@Url.Action("AddnewInvoice", "Invoice")';
             location.href = loadurl;

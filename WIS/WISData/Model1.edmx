@@ -280,7 +280,6 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
             <End Role="tblLocation" EntitySet="tblLocations" />
             <End Role="tblItemInventory" EntitySet="tblItemInventories" />
           </AssociationSet>
-          <EntitySet Name="tblEmployeeLocations" EntityType="WISModel.tblEmployeeLocation" />
           <EntitySet Name="tblExternalClients" EntityType="WISModel.tblExternalClient" />
           <EntitySet Name="tblInvoiceSummaries" EntityType="WISModel.tblInvoiceSummary" />
           <EntitySet Name="tblEmployees" EntityType="WISModel.tblEmployee" />
@@ -294,6 +293,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
             <End Role="tblInvoiceDetail" EntitySet="tblInvoiceDetails" />
           </AssociationSet>
           <EntitySet Name="tblJobs" EntityType="WISModel.tblJob" />
+          <EntitySet Name="tblEmployeeLocations" EntityType="WISModel.tblEmployeeLocation" />
         </EntityContainer>
         <EntityType Name="tblItemInventoryAudit">
           <Key>
@@ -383,15 +383,6 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="tblEmployeeLocation">
-          <Key>
-            <PropertyRef Name="EmployeeID" />
-            <PropertyRef Name="LocationID" />
-          </Key>
-          <Property Name="EmployeeID" Type="Int32" Nullable="false" />
-          <Property Name="LocationID" Type="Int32" Nullable="false" />
-          <Property Name="UseAllAsDefault" Type="Boolean" Nullable="false" />
-        </EntityType>
         <EntityType Name="tblExternalClient">
           <Key>
             <PropertyRef Name="ExternalClientID" />
@@ -489,6 +480,15 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="ShipState" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="ShipZip" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Active" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblEmployeeLocation">
+          <Key>
+            <PropertyRef Name="EmployeeID" />
+            <PropertyRef Name="LocationID" />
+          </Key>
+          <Property Name="EmployeeID" Type="Int32" Nullable="false" />
+          <Property Name="LocationID" Type="Int32" Nullable="false" />
+          <Property Name="UseAllAsDefault" Type="Boolean" Nullable="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -591,15 +591,6 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="tblEmployeeLocations">
-            <EntityTypeMapping TypeName="WISModel.tblEmployeeLocation">
-              <MappingFragment StoreEntitySet="tblEmployeeLocation">
-                <ScalarProperty Name="UseAllAsDefault" ColumnName="UseAllAsDefault" />
-                <ScalarProperty Name="LocationID" ColumnName="LocationID" />
-                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="tblExternalClients">
             <EntityTypeMapping TypeName="WISModel.tblExternalClient">
               <MappingFragment StoreEntitySet="tblExternalClient">
@@ -669,6 +660,15 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
                 <ScalarProperty Name="JobDescription" ColumnName="JobDescription" />
                 <ScalarProperty Name="Job" ColumnName="Job" />
                 <ScalarProperty Name="JCCo" ColumnName="JCCo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEmployeeLocations">
+            <EntityTypeMapping TypeName="WISModel.tblEmployeeLocation">
+              <MappingFragment StoreEntitySet="tblEmployeeLocation">
+                <ScalarProperty Name="UseAllAsDefault" ColumnName="UseAllAsDefault" />
+                <ScalarProperty Name="LocationID" ColumnName="LocationID" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

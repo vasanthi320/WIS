@@ -11,7 +11,7 @@ namespace WISServiceLayer
     {
         IList<ItemInventoryModel> GetInventoryData();
         ItemInventoryModel GetInventoryDataById(int id);
-        List<LocationModel> GetLocationList();
+        IList<LocationModel> GetLocationList();
         List<ItemCategory> GetItemCategories();
         IList<InvoiceModel> GetInvoiceList();
         IList<InvoiceModel> GetInvoiceLists();
