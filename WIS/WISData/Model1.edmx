@@ -12,6 +12,14 @@
           <Property Name="ClientTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ClientTypeDescription" Type="varchar" MaxLength="50" Nullable="false" />
         </EntityType>
+        <EntityType Name="tblDefault">
+          <Key>
+            <PropertyRef Name="DefaultID" />
+          </Key>
+          <Property Name="DefaultID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DefaultName" Type="varchar" MaxLength="100" />
+          <Property Name="DefaultValue" Type="varchar" MaxLength="1000" />
+        </EntityType>
         <EntityType Name="tblEmployee">
           <Key>
             <PropertyRef Name="EmployeeID" />
@@ -61,7 +69,7 @@
           <Property Name="InvoicePONumber" Type="varchar" MaxLength="50" />
           <Property Name="InvoiceOrderedBy" Type="varchar" MaxLength="100" />
           <Property Name="InvoiceTotal" Type="numeric" Precision="12" Scale="2" />
-          <Property Name="InvoiceTerms" Type="varchar" MaxLength="100" />
+          <Property Name="InvoiceTerms" Type="varchar(max)" />
           <Property Name="InvoiceNotes" Type="varchar(max)" />
           <Property Name="InvoiceStatus" Type="varchar" MaxLength="50" />
           <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
@@ -215,6 +223,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
         </Association>
         <EntityContainer Name="WISModelStoreContainer">
           <EntitySet Name="tblClientType" EntityType="Self.tblClientType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblDefault" EntityType="Self.tblDefault" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblEmployee" EntityType="Self.tblEmployee" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblEmployeeLocation" EntityType="Self.tblEmployeeLocation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblExternalClient" EntityType="Self.tblExternalClient" Schema="dbo" store:Type="Tables" />
@@ -294,6 +303,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           </AssociationSet>
           <EntitySet Name="tblJobs" EntityType="WISModel.tblJob" />
           <EntitySet Name="tblEmployeeLocations" EntityType="WISModel.tblEmployeeLocation" />
+          <EntitySet Name="tblDefaults" EntityType="WISModel.tblDefault" />
         </EntityContainer>
         <EntityType Name="tblItemInventoryAudit">
           <Key>
@@ -336,7 +346,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="InvoiceJobNumber" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="InvoicePONumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="InvoiceTotal" Type="Decimal" Precision="12" Scale="2" />
-          <Property Name="InvoiceTerms" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="InvoiceTerms" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="InvoiceNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="InvoiceStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
@@ -489,6 +499,14 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="EmployeeID" Type="Int32" Nullable="false" />
           <Property Name="LocationID" Type="Int32" Nullable="false" />
           <Property Name="UseAllAsDefault" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblDefault">
+          <Key>
+            <PropertyRef Name="DefaultID" />
+          </Key>
+          <Property Name="DefaultID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DefaultName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DefaultValue" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -669,6 +687,15 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
                 <ScalarProperty Name="UseAllAsDefault" ColumnName="UseAllAsDefault" />
                 <ScalarProperty Name="LocationID" ColumnName="LocationID" />
                 <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblDefaults">
+            <EntityTypeMapping TypeName="WISModel.tblDefault">
+              <MappingFragment StoreEntitySet="tblDefault">
+                <ScalarProperty Name="DefaultValue" ColumnName="DefaultValue" />
+                <ScalarProperty Name="DefaultName" ColumnName="DefaultName" />
+                <ScalarProperty Name="DefaultID" ColumnName="DefaultID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

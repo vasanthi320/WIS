@@ -20,6 +20,7 @@
         <AssociationConnector Association="WISModel.FK_tblInvoiceDetail_tblItemInventory" />
         <EntityTypeShape EntityType="WISModel.tblJob" Width="1.5" PointX="6.375" PointY="7.75" />
         <EntityTypeShape EntityType="WISModel.tblEmployeeLocation" Width="1.5" PointX="8.375" PointY="0.75" />
+        <EntityTypeShape EntityType="WISModel.tblDefault" Width="1.5" PointX="10.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

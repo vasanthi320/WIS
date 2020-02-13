@@ -37,5 +37,6 @@ namespace WISData
         public virtual DbSet<tblInvoiceDetail> tblInvoiceDetails { get; set; }
         public virtual DbSet<tblJob> tblJobs { get; set; }
         public virtual DbSet<tblEmployeeLocation> tblEmployeeLocations { get; set; }
+        public virtual DbSet<tblDefault> tblDefaults { get; set; }
     }
 }

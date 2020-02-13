@@ -4,7 +4,9 @@
     
   }
 <br /><br /><br />
+<style>
 
+</style>
 <div class="row">
     <div class="col-md-6">
         <strong><span>Hoar Construction Warehouse<br />
@@ -24,7 +26,7 @@
         @Html.AntiForgeryToken()
         if (Model != null)
         {
-            var result = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
+            //var result = Model.InvoiceDetails.SingleOrDefault().ItemInventoryDescription == null;
             var Status = Model.InvoiceStatus;
             @Html.HiddenFor(p => p.InvoiceID)
             if (Model.InvoiceID > 0)
@@ -54,7 +56,7 @@
                         <b><span><strong>Invoice Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceDate.ToString("MM/dd/yyyy")</strong></span></b>
                     </div>
                     <div>
-                        <b><span class="col-md-offset-6"><strong>Balance Due&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $@Model.InvoiceTotal </strong></span></b>
+                        <b><span class="col-md-offset-5"><strong>Balance Due&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $@Model.InvoiceTotal </strong></span></b>
                     </div>
                 </div>
 
@@ -74,11 +76,11 @@
                     </thead>
                     <tbody>
                         @if (Model != null)
-                        {
-                            var m = Model.InvoiceDetails.FirstOrDefault().ItemInventoryDescription == null;
+                        {                          
                             foreach (var item in Model.InvoiceDetails)
                             {
-                        <tr>
+                                var result = item.ItemInventoryDescription == null;
+                            <tr>
                             <td>@item.ItemInventoryID</td>
                             @if (result == true)
                             {
@@ -142,13 +144,15 @@
             </div>
             <br /><br /><br /><br />
             <br /><br /><br /><br /><br /><br />
-            <div class="row">
-                Terms: <strong>@Model.InvoiceTerms</strong>
-            </div>
-            <br /><br />
-            <div class="row">
-                Notes:<strong>@Model.InvoiceNotes</strong>
-            </div>
+               <div span class="col-md-offset-1 col-sm-offset-1">
+                 <div class="row">
+                 Terms: <strong>@Model.InvoiceTerms</strong>
+               </div>
+                <br /><br />
+                <div class="row">
+                 Notes:<strong>@Model.InvoiceNotes</strong>
+                </div>
+              </div>
         }
     }
 </div>

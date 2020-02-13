@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CllientModel.cs" />
+    <Compile Include="DefaultModel.cs" />
     <Compile Include="EmployeeLocation.cs" />
     <Compile Include="EmployeeModel.cs" />
     <Compile Include="ExternalClientModel.cs" />

@@ -76,6 +76,8 @@ namespace WIS.Controllers
 
             var useremail = GetUserEmail(User.Identity.Name);
             var empdetails = service.GetEmployeeDetails().Where(p=>p.Email==useremail).SingleOrDefault().EmployeeID;
+            //int id = 1;
+            //var defaultDetails = service.GetDefaultValue(id);
             var emp = service.GetEmpLocation(empdetails);
             var Emplocation = emp !=null? emp.LocationID : 1;
             ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
@@ -88,8 +90,8 @@ namespace WIS.Controllers
             model.InvoiceDetails = model.InvoiceDetails ?? new List<InvoiceDetailModel>();            
             model.ClientTypeID = 2;
             model.LocationID = Emplocation;
-            return View("AddInvoiceItem", model);
-            
+            model.defaultdetails = service.GetDefaultDetailsfromDb();
+            return View("AddInvoiceItem", model);            
         }
      
         public SelectList ToSelectList(List<LocationModel> loclist)
@@ -153,6 +155,14 @@ namespace WIS.Controllers
             HttpContext.Session["Invoice"] = lst;
             lst.LocationID = locaton;
             return View("_InvoiceDetails", lst.InvoiceDetails);
+        }
+
+        [HttpPost]
+        public ActionResult saveTermsValtoDb(string termsVal)
+        {
+            var service = new WISService();           
+           var model= service.UpdateDefaultValue(termsVal);
+            return View("AddInvoiceItem", model);
         }
         public ActionResult AddInvoiceItems1(int Id, int qty, decimal price, string CGCode, string itm1, int InvoiceId)
         {
@@ -400,11 +410,11 @@ namespace WIS.Controllers
             ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
             if (ViewBag.JCCO == 1)
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).Job;
+                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
             }
             else
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).Job +" "+ "CO2";
+                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription +" "+ "CO2";
             }
             ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
             ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
@@ -442,11 +452,11 @@ namespace WIS.Controllers
             ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
             if (ViewBag.JCCO == 1)
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).Job;
+                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
             }
             else
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).Job + " " + "CO2";
+                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
             }
             ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
             ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;

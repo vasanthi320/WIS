@@ -30,6 +30,7 @@ namespace WISModels
         public List<InvoiceDetailModel> InvoiceDetails { get; set; }
         public List<EmployeeModel> empdetails { get; set; }
         public List<LocationModel> Locationdetails { get; set; }
+        public List<DefaultModel> defaultdetails { get; set; }
         public int LocationID { get; set; }
         public string Location { get; set; }
         public virtual IEnumerable<LocationModel> locationlist { get; set; }

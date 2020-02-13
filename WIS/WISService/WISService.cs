@@ -58,8 +58,27 @@ namespace WISServiceLayer
             }).SingleOrDefault();
             return lst;
         }
-
-
+        public List<DefaultModel> GetDefaultDetailsfromDb()
+        {
+            var emp = _context.tblDefaults.Select(p => new DefaultModel
+            {
+                DefaultID=p.DefaultID,
+                DefaultName =p.DefaultName,
+                DefaultValue =p.DefaultValue
+            });
+            return emp.ToList();
+        }      
+        public DefaultModel UpdateDefaultValue(string termsVal)
+        {
+            tblDefault emodel;
+            using (var c = new WISEntities())
+            {
+                emodel = c.tblDefaults.SingleOrDefault(p => p.DefaultID == 1);
+                emodel.DefaultValue =termsVal;               
+                c.SaveChanges();
+            }
+            return new DefaultModel { DefaultID = 1, DefaultName = emodel.DefaultName, DefaultValue = emodel.DefaultValue };
+        }
 
         public List<ItemCategory> GetItemCategories()
         {
@@ -214,6 +233,8 @@ namespace WISServiceLayer
             return im;
 
         }
+       
+
         public InvoiceResult SaveInvDtls(InvoiceModel model)
         {
             tblInvoice In = new tblInvoice();
@@ -374,6 +395,7 @@ namespace WISServiceLayer
             var info = UserUtils.FindUserInfo(userName.Trim());
             return info.DisplayName;
         }
+        
 
         public List<InvoicegData> getInvoiceDashboarddata()
         {

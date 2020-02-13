@@ -19,7 +19,7 @@
         {
             foreach (var item in Model)
             {
-                var result = @Model.FirstOrDefault().ItemInventoryDescription == null;
+                var result = item.ItemInventoryDescription == null;
                 <tbody>
                     <tr>
                         <td>@item.ItemInventoryID</td>
@@ -60,7 +60,6 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     <script src="~/Scripts/bootstrap-datepicker.js"></script>
     <script type="text/javascript">
-
      
 
     </script>
