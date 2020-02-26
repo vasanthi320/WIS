@@ -63,7 +63,7 @@
     <div class="form-group">
         <label class="control-label col-xs-4 ">ItemUnitCost</label>
         <div class="col-md-8">
-            @Html.TextBoxFor(model => model.ItemInventoryUnitCost, new { @class = "form-control", @Readonly = true })
+            @Html.TextBoxFor(model => model.ItemInventoryUnitCost, new { @class = "form-control", onchange = "javascript:PopulateItmTotal()" })
             @Html.ValidationMessageFor(model => model.ItemInventoryUnitCost, "", new { @class = "text-danger" })
         </div>
     </div>

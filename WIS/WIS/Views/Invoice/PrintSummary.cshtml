@@ -128,7 +128,7 @@
                                 <span>
                                     Hoar Construction Warehouse<br />
                                     550 Belview Street<br />
-                                    Bessemer Al 35020<br />
+                                    Bessemer AL 35020<br />
                                     United States
                                 </span>
                             </strong>                    
@@ -168,13 +168,13 @@
 
                                 <div class="row">
                                     <div>
-                                        <b><span class="invoice-number"> Invoice # </span> <span class="col-md-offset-1">&nbsp;&nbsp; &nbsp; @Model.InvoiceID </span></b>
+                                        <b><span class="invoice-number"> Invoice # </span> <span class="col-md-offset-1">&nbsp;&nbsp; &nbsp;  WIS @Model.InvoiceID </span></b>
                                     </div>
                                     <div>
                                         <b><span><strong>Invoice Date</strong></span><span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></b>
                                     </div>
                                     <div>
-                                        <b><span><strong>Balance Due</strong></span><span class="col-md-offset-1"> $@Model.InvoiceTotal </span></b>
+                                        <b><span><strong>Balance Due</strong></span><span class="col-md-offset-1">$@Model.InvoiceTotal</span></b>
                                     </div>
                                 </div>
 
@@ -221,21 +221,21 @@
                                 <b>
                                     <span class="col-md-offset-9">
                                         <strong>
-                                            Total<span class="col-md-offset-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceTotal</span>
+                                            <label>Total </label><span class="col-md-offset-1">&nbsp; @Model.InvoiceTotal</span>
                                         </strong>
                                     </span>
                                 </b>
                                 <b>
                                     <span class="col-md-offset-9">
                                         <strong>
-                                            <label>Amount Paid</label> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.00
+                                            <label>Amount Paid </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00
                                         </strong>
                                     </span>
                                 </b>
                                 <b>
                                     <span class="col-md-offset-9">
                                         <strong>
-                                            Balance Due(USD)  @Model.InvoiceTotal
+                                            <label>Balance Due(USD)</label>   @Model.InvoiceTotal
                                         </strong>
                                     </span>
                                 </b>
@@ -257,7 +257,7 @@
                             <br /><br /><br /><br /><br /><br /> <br /><br /><br /><br /><br />
                             <div span class="col-md-offset-1">
                                 <div class="row">
-                                    Terms: <strong>@Model.InvoiceTerms</strong>
+                                    Terms: <strong>@Model.DefaultValue</strong>
                                 </div>
                                 <br /><br />
                                 <div class="row">

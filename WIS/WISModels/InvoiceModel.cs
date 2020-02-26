@@ -17,9 +17,11 @@ namespace WISModels
         public Nullable<int> ClientTypeID { get; set; }
         [Required(ErrorMessage = "InvoiceJobNumber is Required")]
         public string InvoiceJobNumber { get; set; }        
-        public string InvoicePONumber { get; set; }
+        //public string InvoicePONumber { get; set; }
+        public string Vendor { get; set; }
+        public string InvoiceVendor { get; set; }
         public Nullable<decimal> InvoiceTotal { get; set; }       
-        public string InvoiceTerms { get; set; }       
+        //public string InvoiceTerms { get; set; }       
         public string InvoiceNotes { get; set; }
         public string InvoiceStatus { get; set; }
         [Required(ErrorMessage = "Select the Employee")]
@@ -31,7 +33,9 @@ namespace WISModels
         public List<EmployeeModel> empdetails { get; set; }
         public List<LocationModel> Locationdetails { get; set; }
         public List<DefaultModel> defaultdetails { get; set; }
+        public string DefaultValue { get; set; }
         public int LocationID { get; set; }
+        public int employID { get; set; }
         public string Location { get; set; }
         public virtual IEnumerable<LocationModel> locationlist { get; set; }
         public Nullable<int> ExternalClientID { get; set; }
@@ -40,7 +44,7 @@ namespace WISModels
         public Nullable<decimal> TotalAmount { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string CreatedUser { get; set; }
-        public string InvoiceOrderedBy { get; set; }
+        //public string InvoiceOrderedBy { get; set; }
         public System.DateTime UpdatedDate { get; set; }
 
     }

@@ -67,8 +67,6 @@ namespace WIS.Controllers
             model.ModUser = User.Identity.Name;
             model.CreatedDate = DateTime.Now;
             ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();          
-            //ViewBag.Inventory = new SelectList();//service.GetSubItemInventory(model.ItemCategoryID.Value).Where(x => x.ItemInventoryQuantity != 0).Select(p => new SelectListItem { Text = p.ItemInventoryDescription, Value = p.ItemInventoryID.ToString() }).ToList();
-            
             ViewBag.Location = service.GetLocationList().Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString() }).ToList();
             ViewBag.Quantity = model.ItemInventoryQuantity;
             return PartialView("_AddExisProdInventory", model);
@@ -119,10 +117,16 @@ namespace WIS.Controllers
         public ActionResult SaveAddEditItemProdTypes(ItemInventoryModel model)
         {
             int id = 0;
+          
             try
             {
-                model.CreatedUser = User.Identity.Name;
                 var service = new WISService();
+                model.CreatedUser = User.Identity.Name;
+                var emodel = service.GetInventoryDataById(model.ItemInventoryID);
+                model.ItemInventoryNumber = emodel.ItemInventoryNumber;
+                model.ItemInventoryDescription = emodel.ItemInventoryDescription;
+                model.ItemInventorySalesPrice = emodel.ItemInventorySalesPrice;
+                model.ItemInventoryReplacementCost = emodel.ItemInventoryReplacementCost;
                 id = service.SaveEditItmProd(model);
             }
             catch (Exception ex)

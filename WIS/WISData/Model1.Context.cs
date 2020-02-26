@@ -29,7 +29,6 @@ namespace WISData
         public virtual DbSet<tblLocation> tblLocations { get; set; }
         public virtual DbSet<tblItemInventoryAudit> tblItemInventoryAudits { get; set; }
         public virtual DbSet<tblClientType> tblClientTypes { get; set; }
-        public virtual DbSet<tblInvoice> tblInvoices { get; set; }
         public virtual DbSet<tblItemInventory> tblItemInventories { get; set; }
         public virtual DbSet<tblExternalClient> tblExternalClients { get; set; }
         public virtual DbSet<tblInvoiceSummary> tblInvoiceSummaries { get; set; }
@@ -38,5 +37,6 @@ namespace WISData
         public virtual DbSet<tblJob> tblJobs { get; set; }
         public virtual DbSet<tblEmployeeLocation> tblEmployeeLocations { get; set; }
         public virtual DbSet<tblDefault> tblDefaults { get; set; }
+        public virtual DbSet<tblInvoice> tblInvoices { get; set; }
     }
 }

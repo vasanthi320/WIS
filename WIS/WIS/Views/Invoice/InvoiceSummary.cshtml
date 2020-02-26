@@ -41,25 +41,22 @@
                     <div id="JobAddress" class="col-md-6">
                         <p><strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
                             <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
-                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
-                           
+                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />                           
                         </p>
                     </div>
-
                 }
 
                 <div class="row">
                     <div>
-                        <b><span><strong>Invoice#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceID </strong></span></b>
+                        <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
                     </div>
                     <div>
-                        <b><span><strong>Invoice Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.InvoiceDate.ToString("MM/dd/yyyy")</strong></span></b>
+                        <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
                     </div>
                     <div>
-                        <b><span class="col-md-offset-5"><strong>Balance Due&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $@Model.InvoiceTotal </strong></span></b>
+                        <b><span><strong>Balance Due <span class="col-md-offset-1">$@Model.InvoiceTotal</span> </strong></span></b>
                     </div>
                 </div>
-
             }
             <br />
             <div class="table-responsive">
@@ -146,7 +143,7 @@
             <br /><br /><br /><br /><br /><br />
                <div span class="col-md-offset-1 col-sm-offset-1">
                  <div class="row">
-                 Terms: <strong>@Model.InvoiceTerms</strong>
+                 Terms: <strong>@Model.DefaultValue</strong>
                </div>
                 <br /><br />
                 <div class="row">

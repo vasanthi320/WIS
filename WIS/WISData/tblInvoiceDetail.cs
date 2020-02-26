@@ -24,7 +24,7 @@ namespace WISData
         public Nullable<int> InvoiceDetailQuantity { get; set; }
         public Nullable<decimal> InvoiceDetailLineItemTotal { get; set; }
     
-        public virtual tblInvoice tblInvoice { get; set; }
         public virtual tblItemInventory tblItemInventory { get; set; }
+        public virtual tblInvoice tblInvoice { get; set; }
     }
 }

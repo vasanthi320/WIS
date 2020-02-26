@@ -32,7 +32,7 @@
         <div class="form-group" id="employediv" style="display:none">
             <label class="control-label col-xs-3 ">Employee</label>
             <div class="col-sm-7">
-                @Html.DropDownListFor(model => model.Employee, ViewBag.Employee as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control" })
+                @Html.DropDownListFor(model => model.Employee, ViewBag.Employee as IEnumerable<SelectListItem>, new { Class = "form-control" })
                 @Html.ValidationMessageFor(model => model.Employee, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -76,17 +76,17 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-xs-4 ">PO Number</label>
+            <label class="control-label col-xs-4 ">Vendor#</label>
             <div class="col-sm-8">
-                @Html.TextBoxFor(model => model.InvoicePONumber, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.InvoicePONumber, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.Vendor, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Vendor, "", new { @class = "text-danger" })
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-xs-4 ">Ordered By</label>
+            <label class="control-label col-xs-4 ">Vendor Invoice#</label>
             <div class="col-sm-8">
-                @Html.TextBoxFor(model => model.InvoiceOrderedBy, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.InvoiceOrderedBy, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.InvoiceVendor, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.InvoiceVendor, "", new { @class = "text-danger" })
             </div>
         </div>
     </div>
@@ -104,15 +104,15 @@
     <div class="col-md-12 form-inline" style="text-align:center">
         <div class="form-group">
             <label for="date" class="control-label col-xs-2 ">Terms</label>
-            <div class="col-sm-4">
-                @Html.TextAreaFor(p => p.InvoiceTerms, new { @class = "form-control" })
-                @Html.ValidationMessageFor(p => p.InvoiceTerms, "", new { @class = "text-danger" })
+            <div class="col-sm-6">
+                @Html.TextAreaFor(p => p.defaultdetails.SingleOrDefault().DefaultValue, new { @class = "form-control", @readonly = true, rows = 5, columns = 25 })
+                @Html.ValidationMessageFor(p => p.DefaultValue, "", new { @class = "text-danger" })
             </div>
         </div>
         <div class="form-group">
             <label for="date" class="control-label col-xs-2 ">Notes</label>
-            <div class="col-sm-4">
-                @Html.TextAreaFor(p => p.InvoiceNotes, new { @class = "form-control" })
+            <div class="col-sm-6">
+                @Html.TextAreaFor(p => p.InvoiceNotes, new { @class = "form-control", rows = 5, columns = 25 })
                 @Html.ValidationMessageFor(p => p.InvoiceNotes, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -158,7 +158,7 @@
             $('.Datepicker').datepicker("setDate", new Date());
 
             $('.Datepicker').datepicker();
-
+            GetClient();
             $("#InvoiceJobNumber").autocomplete({
                 source: function (request, response) {
                     $.ajax({
@@ -194,7 +194,7 @@
         }
 
         function GetClient() {
-                var cl = $('#ClientID').val();
+            var cl = $('#ClientTypeID').val();
             if (cl == 1) {
                 $("#employediv").show();
                 $("#Projectdiv").hide();
@@ -203,7 +203,7 @@
                 $("#employediv").hide();
                 $("#Projectdiv").show();
                 $("#extclientdiv").hide();
-            } else if (cl == 0) {
+            } else if (cl == 3) {
                 $("#employediv").hide();
                 $("#Projectdiv").hide();
                 $("#extclientdiv").show();
@@ -247,7 +247,6 @@
         var Maxqty = 0;
         var Id = 0;
         function GetInvoiceDetails(edit = "") {
-
             var itm = $('#ItemInventoryID option:selected').val();
             var lst = itm.split("|");
             Id = lst[0];
@@ -259,8 +258,7 @@
                 $("#ItemInventoryUnitCost").val(((Math.round(lst[1] * 100) / 100).toFixed(2)));
             }
         }
-
-
+       
         function PopulateItmTotal() {
             var item = $('#ItemInventoryUnitCost').val();
             Maxqty = parseInt($('#InvoiceDetailQuantity').val());

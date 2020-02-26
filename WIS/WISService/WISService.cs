@@ -79,7 +79,6 @@ namespace WISServiceLayer
             }
             return new DefaultModel { DefaultID = 1, DefaultName = emodel.DefaultName, DefaultValue = emodel.DefaultValue };
         }
-
         public List<ItemCategory> GetItemCategories()
         {
             var lst = _context.tblItemCategories.Select(p => new ItemCategory
@@ -165,16 +164,14 @@ namespace WISServiceLayer
         public InvoiceModel DeleteInvoiceDetail(int invoiceDetailID, int invoiceId)
         {
             var invoiceitm = _context.tblInvoices.Find(invoiceId);
-            var itm = invoiceitm.tblInvoiceDetails.SingleOrDefault(p => p.InvoiceDetailID == invoiceDetailID);
-            //itm.InvoiceTotal = itm.InvoiceTotal - itm.tblInvoiceDetails.FirstOrDefault().InvoiceDetailLineItemTotal;
+            var itm = invoiceitm.tblInvoiceDetails.SingleOrDefault(p => p.InvoiceDetailID == invoiceDetailID);          
             _context.tblInvoiceDetails.Remove(itm);
             _context.SaveChanges();
             invoiceitm.InvoiceTotal = invoiceitm.tblInvoiceDetails.Sum(j => j.InvoiceDetailLineItemTotal);
             var s = _context.SaveChanges() > 0;
             var im = MapInvoice(invoiceitm);
             return im;
-        }
-
+        }       
         public InvoiceDetailModel GetInvoiceDataById(int id)
         {
             var itm = _context.tblInvoiceDetails.Find(id);
@@ -208,16 +205,17 @@ namespace WISServiceLayer
             im.LocationID = model.LocationID.HasValue ? model.LocationID.Value : 0;
             im.InvoiceJobNumber = model.InvoiceJobNumber;
             im.InvoiceNotes = model.InvoiceNotes;
-            im.InvoiceTerms = model.InvoiceTerms;
+            //im.InvoiceTerms = model.InvoiceTerms;
+            im.DefaultValue = model.InvoiceTerms;
             im.InvoiceTotal = model.InvoiceTotal;
-            im.InvoiceOrderedBy = model.InvoiceOrderedBy;
+            im.InvoiceVendor = model.VendorInvoice_;
             im.InvoiceStatus = model.InvoiceStatus;
             im.InvoiceDate = model.InvoiceDate;
             im.InvoiceNumber = model.InvoiceNumber;
             im.Employee = model.EmployeeID.ToString();
             im.CreatedDate = model.CreatedDate;
             im.CreatedUser = model.CreatedUser;
-            im.InvoicePONumber = model.InvoicePONumber;
+            im.Vendor = model.Vendor_;
             im.InvoiceDetails = model.tblInvoiceDetails.Select(p => new InvoiceDetailModel
             {
                 InvoiceDetailID = p.InvoiceDetailID,
@@ -231,9 +229,7 @@ namespace WISServiceLayer
 
             }).ToList();
             return im;
-
-        }
-       
+        }       
 
         public InvoiceResult SaveInvDtls(InvoiceModel model)
         {
@@ -243,15 +239,15 @@ namespace WISServiceLayer
             In.InvoiceJobNumber = model.InvoiceJobNumber;
             In.InvoiceNumber = "123";
             In.EmployeeID = model.ClientTypeID == 1 ? Convert.ToInt32(model.Employee) : (int?)null;
-            In.InvoicePONumber = model.InvoicePONumber;
+            In.Vendor_ = model.Vendor;
             In.LocationID = model.LocationID;
-            In.InvoiceStatus = model.InvoiceStatus == "D" ? "Drafted" : "Completed";
-            In.InvoiceTerms = model.InvoiceTerms;
+            In.InvoiceStatus = model.InvoiceStatus == "D" ? "Drafted" : model.InvoiceStatus == "ME"? "Drafted" : "Completed";
+            In.InvoiceTerms = model.DefaultValue;
             In.ExternalClientID = model.ExternalClientID;
             In.InvoiceTotal = model.InvoiceTotal;
             In.InvoiceDate = model.InvoiceDate;
             In.InvoiceNotes = model.InvoiceNotes;
-            In.InvoiceOrderedBy = model.InvoiceOrderedBy;
+            In.VendorInvoice_ = model.InvoiceVendor;
             In.CreatedUser = model.CreatedUser;
             In.CreatedDate = DateTime.Now;
             //save InoviceDetails
@@ -272,9 +268,10 @@ namespace WISServiceLayer
                         InvoiceID = item.InvoiceID
                     };
                     In.tblInvoiceDetails.Add(idt);
-                    //In.InvoiceTotal += item.InvoiceDetailLineItemTotal;
-                    if (model.InvoiceStatus != "D" && model.InvoiceDetails.FirstOrDefault().NonInventoryItem == null)
-                    {
+                    var ct=model.InvoiceDetails.Count();                  
+                    //if (model.InvoiceStatus != "D" && model.InvoiceDetails.FirstOrDefault().NonInventoryItem == null)
+                        if ((model.InvoiceStatus == "D" || model.InvoiceStatus == "ME"|| model.InvoiceStatus == "A") && item.NonInventoryItem == null)
+                        {
                         var checkQty = false;
                         var itm = _context.tblItemInventories.SingleOrDefault(x => x.ItemInventoryID == item.ItemInventoryID);
                         if (itm.ItemInventoryQuantity >= item.InvoiceDetailQuantity.Value)
@@ -288,7 +285,6 @@ namespace WISServiceLayer
                         }
                     }
                 }
-
             }
             _context.tblInvoices.Add(In);
             var r = _context.SaveChanges();
@@ -322,7 +318,7 @@ namespace WISServiceLayer
             {
                 it = _context.tblItemInventories.Find(model.ItemInventoryID);
                 it.ModDate = DateTime.Now;
-                it.ModUser = model.CreatedUser;
+                it.ModUser = model.CreatedUser;             
             }
             else
             {
@@ -336,6 +332,7 @@ namespace WISServiceLayer
             it.ItemCategoryID = model.ItemCategoryID;
             it.ItemInventoryID = model.ItemInventoryID;
             it.ItemInventoryQuantity = model.ItemInventoryQuantity;
+            it.ItemInventorySalesPrice = model.ItemInventorySalesPrice;
             it.ItemInventoryReplacementCost = model.ItemInventoryReplacementCost;
             it.ItemInventoryNumber = model.ItemInventoryNumber;
             it.ItemInventoryDescription = model.ItemInventoryDescription;
@@ -366,7 +363,26 @@ namespace WISServiceLayer
             }
             var r = _context.SaveChanges();
             return MapInvoice(invoice);
-
+        }
+        public tblInvoice updateInvoiceDetail(InvoiceModel model)
+        {
+            tblInvoice tI;
+            var inv = _context.tblInvoices.Find(model.InvoiceID);
+            inv.ClientTypeID = model.ClientTypeID;
+            //inv.EmployeeID =model.Employee = "NULL" ? "NULL":Convert.ToInt32(model.Employee);
+            inv.ExternalClientID = model.ExternalClientID;
+            inv.InvoiceJobNumber = model.InvoiceJobNumber;
+            inv.LocationID = model.LocationID;
+            inv.InvoiceTerms = model.DefaultValue;
+            inv.InvoiceNotes = model.InvoiceNotes;
+            inv.InvoiceDate = model.InvoiceDate;
+            inv.VendorInvoice_ = model.InvoiceVendor;
+            inv.Vendor_ = model.Vendor;
+            inv.InvoiceStatus = model.InvoiceStatus == "D" ? "Drafted" : model.InvoiceStatus == "ME" ? "Drafted" : "Completed";
+            //inv.InvoiceStatus = model.InvoiceStatus == "D" ? "Drafted" : "Completed";
+            //inv.InvoiceTotal = model.tblInvoiceDetails.Sum(j => j.InvoiceDetailLineItemTotal);
+            var s = _context.SaveChanges() > 0;           
+            return inv;
         }
         public IList<InvoiceModel> GetInvoiceList()
         {
@@ -378,12 +394,12 @@ namespace WISServiceLayer
                 ClientTypeID = p.ClientTypeID,
                 LocationID = p.LocationID.HasValue ? p.LocationID.Value : 0,
                 InvoiceJobNumber = p.InvoiceJobNumber,
-                InvoicePONumber = p.InvoicePONumber,
+                Vendor = p.Vendor_,
                 InvoiceTotal = p.InvoiceTotal,
-                InvoiceTerms = p.InvoiceTerms,
+                DefaultValue = p.InvoiceTerms,
                 InvoiceNotes = p.InvoiceNotes,
                 InvoiceStatus = p.InvoiceStatus,
-                InvoiceOrderedBy = p.InvoiceOrderedBy,
+                InvoiceVendor = p.VendorInvoice_,
                 CreatedDate = DateTime.Now,
                 CreatedUser = p.CreatedUser
             }).ToList();
@@ -395,19 +411,15 @@ namespace WISServiceLayer
             var info = UserUtils.FindUserInfo(userName.Trim());
             return info.DisplayName;
         }
-        
-
         public List<InvoicegData> getInvoiceDashboarddata()
-        {
-            //var lst = from p into _context.tblInvoices
+        {           
             var grouped = (from p in _context.tblInvoices
                            group p by new { month = p.CreatedDate.Month, year = p.CreatedDate.Year } into d
                            select new InvoicegData { Month = d.Key.month, Year = d.Key.year, Completed = d.Where(p => p.InvoiceStatus == "Completed").Sum(k => k.InvoiceTotal) ?? 0, Drafted = d.Where(p => p.InvoiceStatus == "Drafted").Sum(k => k.InvoiceTotal) ?? 0 }).ToList();
             return grouped;
         }
         public IList<InvoiceModel> GetInvoiceLists()
-        {
-            /*OrderBy(m=>m.InvoiceDate).Take(dt.AddDays()).*/
+        {            
             int days = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
             var dt = DateTime.Now.AddDays(-days);
             var Invlst = _context.tblInvoices.Select(p => new InvoiceModel
@@ -418,11 +430,11 @@ namespace WISServiceLayer
                 ClientTypeID = p.ClientTypeID,
                 LocationID = p.LocationID.HasValue ? p.LocationID.Value : 0,
                 InvoiceJobNumber = p.InvoiceJobNumber,
-                InvoicePONumber = p.InvoicePONumber,
+                Vendor = p.Vendor_,
                 InvoiceTotal = p.InvoiceTotal,
-                InvoiceTerms = p.InvoiceTerms,
+                DefaultValue = p.InvoiceTerms,
                 InvoiceNotes = p.InvoiceNotes,
-                InvoiceOrderedBy = p.InvoiceOrderedBy,
+                InvoiceVendor = p.VendorInvoice_,
                 InvoiceStatus = p.InvoiceStatus,
                 CreatedDate = DateTime.Now,
                 CreatedUser = p.CreatedUser
@@ -485,7 +497,7 @@ namespace WISServiceLayer
             var jlst = _context.tblJobs.Select(p => new JobModel
             {
                 Job = p.Job,
-                JobDescription = p.Job + " " + p.JobDescription,
+                JobDescription = p.Job + " " + p.JobDescription,             
                 MailAddress = p.MailAddress,
                 MailCity = p.MailCity,
                 MailState = p.MailState,
@@ -540,7 +552,6 @@ namespace WISServiceLayer
 
             return loc;
         }
-
         public IList<ExternalClientModel> GetExternalClientList()
         {
             var clst = _context.tblExternalClients.Select(p => new ExternalClientModel
@@ -599,11 +610,11 @@ namespace WISServiceLayer
             using (var c = new WISEntities())
             {
                 emodel = c.tblInvoices.SingleOrDefault(p => p.InvoiceID == Id);
-                emodel.InvoiceStatus = InvStatus == "D" ? "Drafted" : "Completed"; 
+                emodel.InvoiceStatus = InvStatus == "D" ? "Drafted" : InvStatus == "ME" ? "Drafted" : "Completed";
+                //emodel.InvoiceStatus = InvStatus == "D" ? "Drafted" : "Completed"; 
                 c.SaveChanges();
             }
             return new InvoiceModel { InvoiceStatus = emodel.InvoiceStatus, InvoiceID = Id };
-        }
-        
-}
+        }        
+    }
 }

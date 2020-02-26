@@ -34,7 +34,7 @@
                               <th>Date</th>
                               <th>ClientID</th>
                               <th>InvoiceJobNumber</th>
-                              <th>InvoicePONumber</th>
+                              <th>Vendor#</th>
                               <th>Total</th>
                               <th>InvoiceTerms</th>
                               <th>InvoiceNotes</th>
@@ -52,9 +52,9 @@
                                       <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
                                       <td>@item.ClientTypeID</td>
                                       <td>@item.InvoiceJobNumber</td>
-                                      <td>@item.InvoicePONumber</td>
+                                      <td>@item.Vendor</td>
                                       <td>@item.InvoiceTotal</td>
-                                      <td>@item.InvoiceTerms</td>
+                                      <td>@item.DefaultValue</td>
                                       <td>@item.InvoiceNotes</td>
                                       <td>@item.InvoiceStatus</td>
                                       <td>
@@ -89,7 +89,7 @@
                               <th>Date</th>
                               <th>ClientID</th>
                               <th>InvoiceJobNumber</th>
-                              <th>InvoicePONumber</th>
+                              <th>Vendor#</th>
                               <th>Total</th>
                               <th>InvoiceTerms</th>
                               <th>InvoiceNotes</th>
@@ -107,9 +107,9 @@
                                       <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
                                       <td>@item.ClientTypeID</td>
                                       <td>@item.InvoiceJobNumber</td>
-                                      <td>@item.InvoicePONumber</td>
+                                      <td>@item.Vendor</td>
                                       <td>@item.InvoiceTotal</td>
-                                      <td>@item.InvoiceTerms</td>
+                                      <td>@item.DefaultValue</td>
                                       <td>@item.InvoiceNotes</td>
                                       <td>@item.InvoiceStatus</td>    
                                       <td>
@@ -159,19 +159,16 @@
             $('#Comptinvoice_id').DataTable({
                 responsive: true,
                 paging: true,
+                pageLength: 200,
                 autoWidth: false,
                 "bInfo": false,
+                "aaSorting": [[0, "desc"]],
                 searching: true,
             });
             $('.Datepicker').datepicker("setDate", new Date());
 
             $('.Datepicker').datepicker();
         });
-       
-         
-       
-     
-        
         
         function NewInvoice() {
    var loadurl = '@Url.Action("AddnewInvoice", "Invoice")';

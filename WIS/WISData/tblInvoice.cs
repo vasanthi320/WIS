@@ -23,19 +23,19 @@ namespace WISData
         public int InvoiceID { get; set; }
         public string InvoiceNumber { get; set; }
         public System.DateTime InvoiceDate { get; set; }
+        public Nullable<int> ExternalClientID { get; set; }
+        public Nullable<int> ClientTypeID { get; set; }
+        public Nullable<int> LocationID { get; set; }
+        public Nullable<int> EmployeeID { get; set; }
         public string InvoiceJobNumber { get; set; }
-        public string InvoicePONumber { get; set; }
+        public string Vendor_ { get; set; }
+        public string VendorInvoice_ { get; set; }
         public Nullable<decimal> InvoiceTotal { get; set; }
         public string InvoiceTerms { get; set; }
         public string InvoiceNotes { get; set; }
         public string InvoiceStatus { get; set; }
         public System.DateTime CreatedDate { get; set; }
         public string CreatedUser { get; set; }
-        public Nullable<int> LocationID { get; set; }
-        public Nullable<int> ExternalClientID { get; set; }
-        public Nullable<int> ClientTypeID { get; set; }
-        public Nullable<int> EmployeeID { get; set; }
-        public string InvoiceOrderedBy { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tblInvoiceDetail> tblInvoiceDetails { get; set; }

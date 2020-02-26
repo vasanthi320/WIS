@@ -41,27 +41,33 @@ namespace WIS.Controllers
         public ActionResult EditInvoice(int InvoiceId)
         {
             var service = new WISService();
-            HttpContext.Session["Invoice"] = null;
-            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
-            //loc = loc == "All" ? "Bessemer" : loc;
+            HttpContext.Session["Invoice"] = null;           
             var useremail = GetUserEmail(User.Identity.Name);
             var empdetails = service.GetEmployeeDetails().Where(p => p.Email == useremail).SingleOrDefault().EmployeeID;
             var emp = service.GetEmpLocation(empdetails);
             var Emplocation = emp != null ? emp.LocationID : 1;
-
+           
             var model = service.GetInvoiceDetails(InvoiceId);
             ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
-            ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job.ToString() }).ToList();
-            ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString() }).ToList();
+            //ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job.ToString() }).ToList();
+            //Changed on 02/24/2020
+            ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text =p.JobDescription, Value = p.Job.ToString() }).ToList();
+            ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString(),Selected=p.EmployeeID.ToString()==model.Employee}).ToList();
             ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
             ViewBag.Location = service.GetLocationList().
                Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString()}).ToList();
             ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
+            if (model.Employee != null && model.Employee != "" && model.Employee != "NULL") 
+              ViewBag.Employee1 = service.GetEmployeeDtlsById(Convert.ToInt32(model.Employee)).FirstName;
+            model.defaultdetails = service.GetDefaultDetailsfromDb();
+
             if (model.InvoiceID > 0)
             {
+               // model.employID = ViewBag.Employee1;
                 // HttpContext.Session["Invoice"] = model;
                 return View("editInvoice", model);
             }
+            
             model.LocationID = Emplocation;
             return View("AddInvoiceItem", model);
         }
@@ -76,7 +82,7 @@ namespace WIS.Controllers
 
             var useremail = GetUserEmail(User.Identity.Name);
             var empdetails = service.GetEmployeeDetails().Where(p=>p.Email==useremail).SingleOrDefault().EmployeeID;
-            //int id = 1;
+          
             //var defaultDetails = service.GetDefaultValue(id);
             var emp = service.GetEmpLocation(empdetails);
             var Emplocation = emp !=null? emp.LocationID : 1;
@@ -133,12 +139,8 @@ namespace WIS.Controllers
             var Inventorylst = new List<SelectListItem>();
             Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
             Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });
-            ViewBag.Inventory = Inventorylst;
-            //ViewBag.Location = service.GetLocationList().
-            //    Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString(), Selected = p.LocationDescription == loc }).ToList();        
-            //ViewBag.Inventory = service.GetInventoryData().Where(x => x.ItemInventoryQuantity != 0 && x.LocationID == Location).Select(p => new SelectListItem { Text = p.ItemInventoryDescription, Value = p.ItemInventoryID.ToString() + "|" + p.ItemInventorySalesPrice + "|" + p.ItemInventoryQuantity }).ToList();
-            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
-            // var item = new InvoiceDetailModel { InvoiceDetailID = -1 };
+            ViewBag.Inventory = Inventorylst;          
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();          
             return View("_editpopupInvoiceItem", model);
         }
         [HttpPost]
@@ -248,12 +250,14 @@ namespace WIS.Controllers
             model.CreatedUser = User.Identity.Name;
             var email = GetUserEmail(model.CreatedUser);
             //var res = bool.TryParse(model.InvoiceStatus, out bool result);
-            var res =!string.IsNullOrEmpty( model.InvoiceStatus);
-           // bool flag;
-           // if (Boolean.TryParse(model.InvoiceStatus, out flag))
-             if (res)
+            var res =!string.IsNullOrEmpty(model.InvoiceStatus);
+            //var detls = service.GetInvoiceDetails(model.InvoiceID);
+            var emodel = service.updateInvoiceDetail(model);
+            // bool flag;
+            // if (Boolean.TryParse(model.InvoiceStatus, out flag))
+            if (res)
              {                          
-                switch(model.InvoiceStatus)
+                switch(emodel.InvoiceStatus)
                 {
                     case "D": break;
                     case "A":
@@ -268,7 +272,7 @@ namespace WIS.Controllers
              }
             else
             {
-                HttpContext.Session["Invoice"] = model;
+                HttpContext.Session["Invoice"] = emodel;
                 return RedirectToAction("AddnewInvoice");
             }
         }
@@ -306,11 +310,7 @@ namespace WIS.Controllers
             else
             {
                 model.InvoiceJobNumber = model.InvoiceJobNumber.Substring(0, 6);
-            }
-            //if (model.InvoiceStatus == "ME" || model.InvoiceStatus == "A")
-            //{
-
-            //}
+            }          
             var res = service.SaveInvDtls(model);
 
             //SendInvoiceEmail(model);
@@ -332,11 +332,8 @@ namespace WIS.Controllers
                     Emodel = HttpContext.Session["Invoice"] as InvoiceModel;
                     Emodel.InvoiceDetails[model.InvoiceDetailID] = model;
                     HttpContext.Session["Invoice"] = Emodel;
-                }
-                // var service = new WISService();
-                // id = service.SaveEditInvoicesDetails(model);
+                }              
                 return View("_InvoiceDetails", Emodel.InvoiceDetails);
-
             }
             catch (Exception ex)
             {
@@ -362,7 +359,10 @@ namespace WIS.Controllers
             var result = service.DeleteInvoiceDetail(InvoiceDetailID, InvoiceId);
             return View("_InvoiceDetails", result.InvoiceDetails);
         }
-        public void SendInvoiceEmail(InvoiceModel model, string email, string status = "Completed")
+
+        //Changed on 2/26/2020
+        //public void SendInvoiceEmail(InvoiceModel model, string email, string status = "Completed")
+        public void SendInvoiceEmail(InvoiceModel model, string email, string status = "Drafted")
         {
             var emailService = new Shared.EmailService();
 
@@ -406,20 +406,24 @@ namespace WIS.Controllers
                 ViewBag.EmployeeName = FirstName + " " + LastName;
                 Emodel.Employee = ViewBag.EmployeeName;
             }
-            ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
-            ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
-            if (ViewBag.JCCO == 1)
+            if (Emodel.InvoiceJobNumber != null && Emodel.InvoiceJobNumber != "" && Emodel.InvoiceJobNumber != "NULL")
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
+                ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
+                if (ViewBag.JCCO == 1)
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                }
+                else
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
+                }
+
+                ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
+                ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
+                ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
+                ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
             }
-            else
-            {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription +" "+ "CO2";
-            }
-            ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
-            ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
-            ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
-            ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
             //Emodel.InvoiceTotal = GetTotal(Emodel);
             HttpContext.Session["Invoice"] = null;
             return View("InvoiceSummary", Emodel);
@@ -447,21 +451,23 @@ namespace WIS.Controllers
                 ViewBag.EmployeeName = FirstName + " " + LastName;
                 Emodel.Employee = ViewBag.EmployeeName;
             }
-            ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
-
-            ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
-            if (ViewBag.JCCO == 1)
+            if (Emodel.InvoiceJobNumber != null && Emodel.InvoiceJobNumber != "" && Emodel.InvoiceJobNumber != "NULL")
             {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
+                ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
+                if (ViewBag.JCCO == 1)
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                }
+                else
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
+                }
+                ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
+                ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
+                ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
+                ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
             }
-            else
-            {
-                ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
-            }
-            ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
-            ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
-            ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
-            ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
             return View("PrintSummary", Emodel);
         }
 
