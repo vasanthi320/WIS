@@ -1,0 +1,290 @@
+﻿@model WISModels.EstimateModel
+@{
+    ViewBag.Title = "Print Summary";
+}
+<br />
+<style type="text/css" media="print">
+
+    .pdf-page {
+        position: relative;
+        margin: 0 auto;
+        padding: .4in .3in;
+        color: #333;
+        background-color: #fff;
+        box-shadow: 0 5px 10px 0 rgba(0,0,0,.3);
+        box-sizing: border-box;
+    }
+
+    .pdf-header {
+        padding-bottom: .2in;
+        margin-bottom: .3in;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .invoice-number {
+        padding-top: .1in;
+        float: right;
+    }
+
+    .pdf-footer {
+        position: absolute;
+        bottom: .25in;
+        left: .3in;
+        right: .3in;
+        padding-top: 0.05in;
+        border-top: 1px solid #e5e5e5;
+        font-size: 0.9em;
+        text-align: left;
+        color: #787878;
+    }
+
+    .addresses {
+        font-size: 12px;
+    }
+
+        .addresses:after {
+            display: block;
+            content: "";
+            clear: both;
+        }
+
+    .for {
+        float: left;
+    }
+
+    .from {
+        float: right;
+    }
+
+    .addresses p {
+        color: #787878;
+        padding: .05in 0;
+        border-top: 1px solid #e5e5e5;
+    }
+
+        .addresses p:first-of-type {
+            border-top: 0;
+        }
+
+    .pdf-body {
+        margin-top: .3in;
+    }
+
+    .company-logo {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #3aabf0;
+    }
+
+    .signature {
+        padding-top: .3in;
+    }
+
+    /* Dimensions other than px and em should be divided by 1.33 for the proper PDF output */
+    .size-a4 {
+        width: 6.2in;
+        height: 8.7in;
+    }
+
+    .size-a5 {
+        width: 8.5in;
+        height: 11in;
+    }
+
+    .size-letter {
+        width: 6.3in;
+        height: 8.2in;
+    }
+
+    .size-executive {
+        width: 5.4in;
+        height: 7.8in;
+        font-size: 12px;
+    }
+
+        .size-executive .pdf-header {
+            margin-bottom: .1in;
+        }
+
+    #pdfDiv {
+        width: 1300px;
+        height: 1000px;
+    }
+</style>
+
+<div class="box wide hidden-on-narrow">
+    <div class="box-col">
+        <a role="button" class="btn btn-primary k-button k-button-icontext k-grid-pdf" onclick="javascript:getPDF()" href="#"><span class="k-button k-button-icontext k-grid-pdf"></span>Export to PDF</a>
+    </div>
+</div>
+<div class="page-container hidden-on-narrow">
+    <div class="pdf-page" id="pdfDiv">
+        <div class="inner-page">
+            <div class="pdf-header">
+            </div>
+            <div class="pdf-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>
+                            <span>
+                                Hoar Construction Warehouse<br />
+                                550 Belview Street<br />
+                                Bessemer AL 35020<br />
+                                United States
+                            </span>
+                        </strong>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="~/Content/img/HOAR_logo.png" class="visible-lg  visible-md pull-right" style="width:50% ;height:50%" />                      
+                    </div>
+                </div>
+
+                <div>
+                    @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (Model != null)
+                        {
+                            var Status = Model.Status;
+
+                            @Html.HiddenFor(p => p.Estimate)
+                            if (Model.Estimate > 0)
+                            {
+                                var job = Model.InvoiceJobNumber;
+                                if (job == null)
+                                {
+                                    <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
+                                }
+                                else
+                                {
+                                    <div id="JobAddress" class="col-md-6">
+                                        <p>
+                                            <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                                        </p>
+                                    </div>
+                                }
+
+                                <div class="row">
+                                    <div>
+                                        <b><span class="invoice-number"> Estimate # </span> <span class="col-md-offset-1">&nbsp;&nbsp; &nbsp;@Model.Estimate </span></b>
+                                    </div>
+                                    <div>
+                                        <b><span><strong>Estimate Date</strong></span><span class="col-md-offset-1">@Model.EstimateDate.ToString("MM/dd/yyyy")</span></b>
+                                    </div>
+                                    <div>
+                                        <b><span><strong>Balance Due</strong></span><span class="col-md-offset-1">    &nbsp;$@Model.Total</span></b>
+                                    </div>
+                                </div>
+
+                            }
+                            <br />
+                            <div class="table-responsive">
+                                <table id="table_id" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Description</th>
+                                            <th>Unit Cost</th>
+                                            <th>CostCode/GLCode</th>
+                                            <th>Quantity</th>
+                                            <th>LineTotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null)
+                                        {
+                                            foreach (var item in Model.EstimateDetails)
+                                            {
+                                                var result = item.EstimateDescription == null;
+                                        <tr>
+                                            <td>@item.ItemInventoryID</td>
+                                            @if (result == true)
+                                            {
+                                                <td>@item.NonInventoryItem</td>
+                                            }
+                                            else
+                                            {
+                                                <td>@item.EstimateDescription</td>
+                                            }
+                                            <td>@item.ItemInventoryCost</td>
+                                            <td>@item.EstimateDetailCostCodeGL</td>
+                                            <td>@item.EstimateDetailQuantity</td>
+                                            <td>@item.EstimateDetailLineItemTotal</td>
+                                        </tr>
+                                            }
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-offset-1" style="padding-left:2em">
+                                <b>
+                                    <span class="col-md-offset-9">
+                                        <strong>
+                                            <label>Total </label><span class="col-md-offset-1">&nbsp; @Model.Total</span>
+                                        </strong>
+                                    </span>
+                                </b>
+                                <b>
+                                    <span class="col-md-offset-9">
+                                        <strong>
+                                            <label>Amount Paid </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00
+                                        </strong>
+                                    </span>
+                                </b>
+                                <b>
+                                    <span class="col-md-offset-9">
+                                        <strong>
+                                            <label>Balance Due(USD)</label>   @Model.Total
+                                        </strong>
+                                    </span>
+                                </b>                             
+                            </div>
+                            <br /><br /><br /><br /><br /><br /> <br /><br /><br /><br /><br />
+                            <div span class="col-md-offset-1">
+                                <div class="row">
+                                    Terms: <strong>@Model.DefaultValue</strong>
+                                </div>
+                                <br /><br />
+                                <div class="row">
+                                    Notes:<strong>@Model.EstimateNotes</strong>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/Scripts/kendo.all.min.js"></script>
+    <script src="~/Scripts/pako_deflate.min.js"></script>
+    <script language="javascript" type="text/javascript">
+
+    kendo.pdf.defineFont({
+        "DejaVu Sans": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans.ttf",
+        "DejaVu Sans|Bold": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+        "DejaVu Sans|Bold|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "DejaVu Sans|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "WebComponentsIcons": "https://kendo.cdn.telerik.com/2017.1.223/styles/fonts/glyphs/WebComponentsIcons.ttf"
+    });
+    var id = "Estimate" + "@Model.Estimate";
+    function getPDF() {
+        kendo.drawing
+            .drawDOM($('#pdfDiv'), {
+                paperSize: "a3", forcePageBreak: ".page-break", multiPage: true, landscape: false, Portrait: true,
+                margin: { left: "0cm", top: "1cm", right: "0cm", bottom: "1cm" }
+            })
+            .then(function (group) {
+                kendo.drawing.pdf.saveAs(group, id);
+                // Render the result as a PNG image
+                kendo.drawing.exportImage.saveAs(group, id);
+            });
+
+    }
+
+    </script>
+}

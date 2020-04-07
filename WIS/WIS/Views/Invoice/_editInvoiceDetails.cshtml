@@ -14,12 +14,7 @@
 
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-    @*<div class="form-group">
-            <label class="control-label col-xs-4 ">ItemInventoryID</label>
-            <div class="col-sm-8 ">
-                @Model.ItemInventoryID
-            </div>
-        </div>*@
+   
     <div id="dropdowndiv">
         <div class="form-group">
             <label class="control-label col-xs-4 ">Category</label>
@@ -28,16 +23,28 @@
                 @Html.ValidationMessageFor(model => model.ItemCategoryID, "", new { @class = "text-danger" })
             </div>
         </div>
-        <div class="form-group">
+        @if (Model.ItemCategoryID!=23) {
+        <div class="form-group" id="itmdiv">
             <label class="control-label col-xs-4 ">ItemID</label>
             <div class="col-md-8">
                 @Html.DropDownListFor(model => model.ItemInventoryID, ViewBag.Inventory as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control", @onchange = "javascript:GetExisProdDetails();" })
 
                 @Html.ValidationMessageFor(model => model.ItemInventoryID, "", new { @class = "text-danger" })
-                @Html.HiddenFor(model => model.ItemInventoryDescription, new { @class = "form-control" })
+                @*@Html.HiddenFor(model => model.ItemInventoryDescription, new { @class = "form-control" })*@
 
             </div>
         </div>
+        }
+        else
+        {
+        <div class="form-group" id="Labordiv">
+            <label class="control-label col-xs-4 ">ItemId</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.ItemInventoryDescription, new { Class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.ItemInventoryDescription, "", new { @class = "text-danger" })
+                </div>
+        </div>
+        }
     </div>
     <div id="textboxdiv" style="display:none">
         <div class="form-group">
@@ -339,22 +346,32 @@
         function GetItemInventoryList() {
             var catId = $('#ItemCategoryID').val();
             var dropdownId = $('#ItemInventoryID');
-            $.ajax({
-                type: "GET",
-                url: '/Invoice/GetItemInventoryList',
-                data: { CategoryId: catId },
-                contentType: "application/json",
-                dataType: "json",
-                success: function (result) {
-                    $(dropdownId).html('');
-                    if (result) {
-                        $(dropdownId).append("<option value = '' >--Select--</option >");
-                        $.each(result, function (index, rs) {
-                            $(dropdownId).append("<option value='" + rs.Value + "'>" + rs.Text + "</option>");
-                        });
+            if (catId == 23) {
+                $("#Labordiv").show();
+                $("#itmdiv").hide();
+            }
+            else {
+                $("#Labordiv").hide();
+                $("#itmdiv").show();
+            }
+            if (catId != 23) {
+                $.ajax({
+                    type: "GET",
+                    url: '/Invoice/GetItemInventoryList',
+                    data: { CategoryId: catId },
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (result) {
+                        $(dropdownId).html('');
+                        if (result) {
+                            $(dropdownId).append("<option value = '' >--Select--</option >");
+                            $.each(result, function (index, rs) {
+                                $(dropdownId).append("<option value='" + rs.Value + "'>" + rs.Text + "</option>");
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         function SubmitInvoice(type) {
             $("#InvoiceStatus").val(type);
@@ -372,11 +389,9 @@
                 data: { id: itm},
                 success: function (data, textStatus, jqXHR) {
                     $("#prePrice").val(data.ItemInventoryQuantity);
-                    $("#currentqty").html(data.ItemInventoryQuantity);
-                    //$('#LocationID').val(data.LocationID);
+                    $("#currentqty").html(data.ItemInventoryQuantity);                  
                     $('#ItemInventoryUnitCost').val(((Math.round(data.ItemInventorySalesPrice * 100) / 100).toFixed(2)));
-                    $('#InvoiceDetailQuantity').val(data.ItemInventoryQuantity);
-                   // $('').val(data.NonInventoryItem);
+                    $('#InvoiceDetailQuantity').val(data.ItemInventoryQuantity);                  
                     $("#InvoiceDetailLineItemTotal").val("");
                     $("#InvoiceQuantity").val("");
 

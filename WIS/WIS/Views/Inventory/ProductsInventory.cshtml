@@ -75,6 +75,7 @@
 <div class="row">
     <br /><br />
     <h2 class="row left">Products and Services</h2>
+
     <div class="text-right">
         <div class="btn-group btn-group-lg PracticeButton">
             <button class="btn-lg PracticeButton">New</button>
@@ -169,28 +170,29 @@
         </div>
     </div>
 </div>
-
 @if (Model != null)
- {
-    <div class="table-responsive row">
-        <table id="Inventorytbl" class="table table-striped table-bordered table-condensed col-md-12">
-            <thead>
-                <tr>                   
-                    <th>NAME</th>
-                    <th>ITEMNUMBER</th>
-                    <th>CATEGORY</th>
-                    <th>LOCATION</th>
-                    <th>SALES PRICE</th>
-                    <th>COST</th>
-                    <th>QTY ON HAND</th>
-                    <th>REORDER POINT</th>
-                    <th>ACTION</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                 {
-                <tr>                  
+{
+<div class="table-responsive row">
+    @*<div class="col-md-offset-7"><strong>Total Replacement Cost : </strong>$@string.Format("{0:#,0.00}", Model.Sum(p => p.ItemInventoryReplacementCost*p.ItemInventoryQuantity))</div>*@
+    <table id="Inventorytbl" class="table table-striped table-bordered table-condensed col-md-12">
+
+        <thead>
+            <tr>
+                <th>NAME</th>
+                <th>ITEMNUMBER</th>
+                <th>CATEGORY</th>
+                <th>LOCATION</th>
+                <th>SALES PRICE</th>
+                <th>COST</th>
+                <th>QTY ON HAND</th>
+                <th>REORDER POINT</th>
+                <th>ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
                     <td>@item.ItemInventoryDescription</td>
                     <td>@item.ItemInventoryNumber</td>
                     <td>@item.ItemCategoryID</td>
@@ -198,17 +200,17 @@
                     <td>@Math.Round(item.ItemInventorySalesPrice ?? 0, 2) </td>
                     <td>@item.ItemInventoryReplacementCost</td>
                     <td>@item.ItemInventoryQuantity</td>
-                  
+
                     <td>2</td>
                     <td>
-                        <a href="#" @*class="btn btn-sm btn-success"*@ onclick="javascript:EditItemInventory(@item.ItemInventoryID)">Edit</a>
+                        <a href="#" onclick="javascript:EditItemInventory(@item.ItemInventoryID)">Edit</a>
                     </td>
-                  </tr>
-                }
-            </tbody>
-        </table>
-    </div>
- }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
 else
 {
     <h4>No Data</h4>
@@ -220,25 +222,62 @@ else
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
+
 
     <script language="javascript" type="text/javascript">
         $(document).ready(function () {
+            $('#Inventorytbl').append('<caption style="caption-side:right"><strong class="col-md-offset-7 text-primary" >Total Replacement Cost : $@string.Format("{0:#,0.00}", Model.Sum(p => p.ItemInventoryReplacementCost*p.ItemInventoryQuantity))</strong>.</caption>');
            $('#Inventorytbl').DataTable({
                 responsive: true,
                 paging: true,
                 pageLength: 200,
                 autoWidth: false,
                 "bInfo": false,
-                searching: true,
+               searching: true,
+               dom: 'Bfrtip',
+               columnDefs: [
+                   {
+                       targets: [0,1,2,3,4,5,6,7,8],
+                       className: 'dt-body-center'
+                   }
+               ],
+               //buttons: [
+               //    'excelHtml5',
+               //    'csvHtml5',
+               //    'pdfHtml5'
+               //],              
+               buttons: [
+                   {
+                       extend: 'csvHtml5',
+                       //messageTop: '<strong>Total Replacement Cost :</strong>$@string.Format("{0:#,0.00}", Model.Sum(p => p.ItemInventoryReplacementCost)).'
+                   },
+                   {
+                       extend: 'excelHtml5',
+                       //messageTop: '<strong>Total Replacement Cost :</strong>$@string.Format("{0:#,0.00}", Model.Sum(p => p.ItemInventoryReplacementCost)).'
+                   },
+                   {
+                       extend: 'pdfHtml5',
+                       customize: function (doc) {
+                           doc.defaultStyle.alignment = 'center';
+                           doc.styles.tableHeader.alignment = 'center';
+                       } 
+                   },
+                   
+               ],
                responsive: true,
                destroy: true,
             });
             GetLocDetails();
         });
+
         var oTable;
         oTable = $('#Inventorytbl').dataTable();
 
-        function GetLocDetails() {            
+        function GetLocDetails() {
             var loc = $("#LocationDescription").val()
             if (loc == "Bessemer") {
                 $("#Alldiv").hide();
@@ -257,7 +296,7 @@ else
                 $("#Houstondiv").hide();
                 oTable.fnFilter("");
             }
-        }     
+        }
 
         //Add new item
         function AddProdItem() {
@@ -293,13 +332,13 @@ else
 
         function GetExisProdDetails() {
             $("#ItemInventoryQuantity").val("");
-            var itm = $('#ItemInventoryID option:selected').val();           
+            var itm = $('#ItemInventoryID option:selected').val();
             var loadurl = '@Url.Action("GetProdDetails", "Inventory")';
             $.ajax(loadurl, {
                 type: "Get",
                 cache: false,
                 data: { id: itm},
-                success: function (data, textStatus, jqXHR) { 
+                success: function (data, textStatus, jqXHR) {
                     $("#prePrice").val(data.ItemInventoryQuantity);
                     $("#currentqty").html(data.ItemInventoryQuantity);
                     $('#LocationID').val(data.LocationID);
@@ -307,7 +346,7 @@ else
                 }
             });
         }
-        function GetQuantity() {           
+        function GetQuantity() {
             var previous = parseInt($('#prePrice').val());
             var qt = parseInt($('#ItemInventoryQuantity').val());
             $('#ItemInventoryQuantity').val(qt+previous);

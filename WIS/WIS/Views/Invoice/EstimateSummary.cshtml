@@ -1,11 +1,9 @@
-﻿@model WISModels.InvoiceModel
+﻿@model WISModels.EstimateModel
 @{
-    ViewBag.Title = "Invoice Summary";
+    ViewBag.Title = "Estimate Summary";
 
 }
 <br /><br /><br />
-<style>
-</style>
 <div class="row">
     <div class="col-md-6">
         <strong>
@@ -17,25 +15,23 @@
             </span>
         </strong>
     </div>
-
     <div class="col-md-6">
-        @*<img src="~/Content/img/HOAR_logo.png"  class="visible-lg  visible-md pull-right" style="width:50% ;height:50%"/>*@
+        <img src="~/Content/img/HOAR_logo.png" class="visible-lg  visible-md pull-right" style="width:50% ;height:50%" />       
     </div>
 </div>
-<br /> <br />
+
 <div>
-    @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+    @using (Html.BeginForm("SubmitEstimate", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
     {
         @Html.AntiForgeryToken()
         if (Model != null)
-        {
-            //var result = Model.InvoiceDetails.SingleOrDefault().ItemInventoryDescription == null;
-            var Status = Model.InvoiceStatus;
-            @Html.HiddenFor(p => p.InvoiceID)
-            if (Model.InvoiceID > 0)
+        {            
+            var Status = Model.Status;
+            @Html.HiddenFor(p => p.Estimate)
+            if (Model.Estimate > 0)
             {
                 var job = Model.InvoiceJobNumber;
-                if (job == "NULL" || job == null)
+                if (job == null)
                 {
                     <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
                 }
@@ -49,34 +45,18 @@
                         </p>
                     </div>
                 }
-                if (job == "NULL" || job == null)
-                {
-                    <div class="row">
-                        <div>
-                            <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
-                        </div>
-                        <div>
-                            <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
-                        </div>
-                        <div>
-                            <b><span><strong class="col-md-offset-6">Balance Due <span class="col-md-offset-1">$@Model.InvoiceTotal</span> </strong></span></b>
-                        </div>
+
+                <div class="row">
+                    <div>
+                        <b><span><strong>Estimate#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   @Model.Estimate</sapn></strong></span></b>
                     </div>
-                }
-                else
-                {
-                    <div class="row">
-                        <div>
-                            <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
-                        </div>
-                        <div>
-                            <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
-                        </div>
-                        <div>
-                            <b><span><strong>Balance Due <span class="col-md-offset-1">$@Model.InvoiceTotal</span> </strong></span></b>
-                        </div>
+                    <div>
+                        <b><span><strong>Estimate Date  <span class="col-md-offset-1">@Model.EstimateDate.ToString("MM/dd/yyyy")</span></strong></span></b>
                     </div>
-                }
+                    <div>
+                        <b><span><strong>Estimate Total <span class="col-md-offset-1">$@Model.Total</span> </strong></span></b>
+                    </div>
+                </div>
             }
             <br />
             <div class="table-responsive">
@@ -94,9 +74,9 @@
                     <tbody>
                         @if (Model != null)
                         {
-                            foreach (var item in Model.InvoiceDetails)
+                            foreach (var item in Model.EstimateDetails)
                             {
-                                var result = item.ItemInventoryDescription == null;
+                                var result = item.EstimateDescription == null;
                                 <tr>
                                     <td>@item.ItemInventoryID</td>
                                     @if (result == true)
@@ -105,12 +85,12 @@
                                     }
                                     else
                                     {
-                                        <td>@item.ItemInventoryDescription</td>
+                                        <td>@item.EstimateDescription</td>
                                     }
-                                    <td>@item.ItemInventoryUnitCost</td>
-                                    <td>@item.InvoiceDetailCostCodeGL</td>
-                                    <td>@item.InvoiceDetailQuantity</td>
-                                    <td>@item.InvoiceDetailLineItemTotal</td>
+                                    <td>@item.ItemInventoryCost</td>
+                                    <td>@item.EstimateDetailCostCodeGL</td>
+                                    <td>@item.EstimateDetailQuantity</td>
+                                    <td>@item.EstimateDetailLineItemTotal</td>
                                 </tr>
                             }
                         }
@@ -123,7 +103,7 @@
                     <span class="col-md-offset-9">
                         <strong>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Model.InvoiceTotal
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Model.Total
                         </strong>
                     </span>
                 </b>
@@ -143,7 +123,7 @@
                             <thead>
                                 <tr>
                                     <th>Balance Due(USD)</th>
-                                    <th> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;$@Model.InvoiceTotal</th>
+                                    <th> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;$@Model.Total</th>
                                 </tr>
                             </thead>
                         </table>
@@ -161,9 +141,11 @@
                 </div>
                 <br /><br />
                 <div class="row">
-                    Notes:<strong>@Model.InvoiceNotes</strong>
+                    Notes:<strong>@Model.EstimateNotes</strong>
                 </div>
             </div>
         }
     }
 </div>
+
+

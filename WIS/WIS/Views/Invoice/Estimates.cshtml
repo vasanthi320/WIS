@@ -1,0 +1,122 @@
+﻿@model IEnumerable<WISModels.EstimateModel>
+
+<style>
+    #invoice_id {
+        word-wrap: break-word;
+    }
+
+    table.table-striped thead tr th {
+        word-wrap: break-word;
+    }
+</style>
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<br /><br />
+<h2 class="row left">Estimates</h2>
+<div class="row pull-right">
+    <button id="AddButtonId" class="btn btn-success" onclick="javascript:NewEstimate()">New Estimate&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+</div>
+<br/><br/>
+@if (Model != null)
+{
+    <button id="AddButtonId" class="btn btn-sm btn-primary col-md-offset-7" onclick="javascript:ConverttoInv()">Convert to Invoice&nbsp;</button>
+          <table id="estimates_id" class="table table-striped table-bordered table-condensed col-md-12">   
+              <thead>                  
+                  <tr>
+                      <th>
+                          @Html.CheckBox("a", new { @class = "", id = "select_all" })
+                      </th>
+                      <th>Estimate</th>
+                      <th>Estimate Number</th>
+                      <th>Client</th>
+                      <th>Date</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th></th>
+                  </tr>
+              </thead>
+              <tbody>
+                  @if (Model != null)
+                  {
+                      foreach (var item in Model)
+                      {
+                          var st = item.Status;
+                          <tr>
+                              <td>@Html.CheckBox("a", new { @class = "dt-checkboxes", value = item.Estimate })</td>
+                              <td>@item.Estimate</td>
+                              <td>@item.EstimateNumber</td>
+                              <td>Job @item.InvoiceJobNumber</td>
+                              <td>@item.CreatedDate.ToString("MM/dd/yyyy")</td>
+                              <td>@item.Total</td>
+                              @if(st =="accepted"){
+                              <td class="text-success">@item.Status</td>
+                              }
+                              else
+                              {
+                              <td>@item.Status</td>
+                              }
+                              <td>
+                                  @Html.ActionLink("Details", "GetEstimateSummary", "Invoice", new { Estimate = item.Estimate }, new { @class = "btn btn-sm btn-success" })
+                                  <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryEstimate", "Invoice", new {  Estimate = item.Estimate })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                                  @Html.ActionLink("Edit", "EditEstimate", "Invoice", new { Estimate = item.Estimate }, new { @class = "btn btn-sm btn-primary" })
+                              </td>
+                          </tr>
+                      }
+                  }
+              </tbody>
+
+          </table>
+}
+else
+{
+    <h4>No Data</h4>
+}
+@section scripts {
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#estimates_id').DataTable({
+                responsive: true,
+                paging: true,
+                pageLength: 100,
+                autoWidth: false,
+                "bInfo": false,
+                searching: true,
+            });
+            //$('.Datepicker').datepicker("setDate", new Date());
+
+            //$('.Datepicker').datepicker();
+
+        });
+
+        function NewEstimate() {
+   var loadurl = '@Url.Action("AddnewEstimate", "Invoice")';
+            location.href = loadurl;
+        }
+
+        function ConverttoInv() {             
+            var colors;
+            $('#estimates_id').find('.dt-checkboxes:checked').each(function (i) {
+                   colors = $(this).val();
+                });                        
+                if (colors > 0) {              
+                        jQuery.ajax({
+                            url: '@Url.Action("ConvertEsttoInv", "Invoice")',
+                            method: 'Post',
+                            data: { EstimateID: colors }                            
+                        }).done(function (response) {
+                           window.location = '@Url.Action("Invoices", "Invoice")';                           
+                        }).fail(function () {
+                        });
+                   }               
+                else {
+                    alert("Select atleast one Estimate");
+                }
+            }
+
+    </script>
+}

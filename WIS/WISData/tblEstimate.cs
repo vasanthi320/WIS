@@ -12,33 +12,32 @@ namespace WISData
     using System;
     using System.Collections.Generic;
     
-    public partial class tblInvoice
+    public partial class tblEstimate
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public tblInvoice()
+        public tblEstimate()
         {
-            this.tblInvoiceDetails = new HashSet<tblInvoiceDetail>();
+            this.tblEstimateDetails = new HashSet<tblEstimateDetail>();
         }
     
-        public int InvoiceID { get; set; }
-        public string InvoiceNumber { get; set; }
-        public System.DateTime InvoiceDate { get; set; }
+        public int EstimateId { get; set; }
+        public string EstimateNumber { get; set; }
+        public System.DateTime EstimateDate { get; set; }
+        public string ClientName { get; set; }
+        public System.DateTime CreatedDate { get; set; }
+        public Nullable<decimal> Total { get; set; }
+        public string Status { get; set; }
         public Nullable<int> ExternalClientID { get; set; }
         public Nullable<int> ClientTypeID { get; set; }
         public Nullable<int> LocationID { get; set; }
         public Nullable<int> EmployeeID { get; set; }
-        public string InvoiceJobNumber { get; set; }
         public string Vendor_ { get; set; }
-        public string VendorInvoice_ { get; set; }
-        public Nullable<decimal> InvoiceTotal { get; set; }
-        public string InvoiceTerms { get; set; }
-        public string InvoiceNotes { get; set; }
-        public string InvoiceStatus { get; set; }
-        public System.DateTime CreatedDate { get; set; }
+        public string VendoeEstimate { get; set; }
+        public string EstimateTerms { get; set; }
+        public string EstimateNotes { get; set; }
         public string CreatedUser { get; set; }
-        public Nullable<bool> IsArchived { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<tblInvoiceDetail> tblInvoiceDetails { get; set; }
+        public virtual ICollection<tblEstimateDetail> tblEstimateDetails { get; set; }
     }
 }

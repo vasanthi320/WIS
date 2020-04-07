@@ -20,21 +20,24 @@
         word-wrap: break-word;        
     }
 </style>
+
 <br /><br />
       <div>
           @Html.HiddenFor(p => p.FirstOrDefault().InvoiceID)
           <h4 class="text-success"><strong>Save Draft</strong></h4>
           @if (Model != null)
           {
+              <button id="AddButtonId" class="btn btn-sm btn-primary col-md-offset-7" onclick="javascript:ArchiveInvoices()">Archive Invoices&nbsp;</button>
               <div class="table-responsive">
                   <table id="invoice_id" class="table table-striped table-bordered table-condensed col-md-12">
                       <thead>
-                          <tr>                              
+                          <tr>
                               <th>InvoiceNumber</th>
                               <th>Date</th>
                               <th>ClientID</th>
                               <th>InvoiceJobNumber</th>
                               <th>Vendor#</th>
+                              <th>Vendor InVoice#</th>
                               <th>Total</th>
                               <th>InvoiceTerms</th>
                               <th>InvoiceNotes</th>
@@ -47,12 +50,13 @@
                           {
                               foreach (var item in Model.Where(k => k.InvoiceStatus == "Drafted"))
                               {
-                                  <tr>                                     
+                                  <tr>
                                       <td>@item.InvoiceNumber</td>
                                       <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
                                       <td>@item.ClientTypeID</td>
                                       <td>@item.InvoiceJobNumber</td>
                                       <td>@item.Vendor</td>
+                                      <td>@item.InvoiceVendor</td>
                                       <td>@item.InvoiceTotal</td>
                                       <td>@item.DefaultValue</td>
                                       <td>@item.InvoiceNotes</td>
@@ -66,7 +70,6 @@
                               }
                           }
                       </tbody>
-
                   </table>
               </div>
           }
@@ -84,16 +87,20 @@
               <div class="table-responsive">
                   <table id="Comptinvoice_id" class="table table-striped table-bordered table-condensed col-md-12">
                       <thead>
-                          <tr>                             
-                              <th>InvoiceNumber</th>
+                          <tr>
+                              <th>SelectAll
+                                  @Html.CheckBox("a", new { @class = "", id = "select_all" })
+                              </th>
+                              <th>Invoice Number</th>
                               <th>Date</th>
                               <th>ClientID</th>
-                              <th>InvoiceJobNumber</th>
+                              <th>Invoice JobNumber</th>
                               <th>Vendor#</th>
+                              <th>Vendor InVoice#</th>
                               <th>Total</th>
                               <th>InvoiceTerms</th>
                               <th>InvoiceNotes</th>
-                              <th>Status</th>     
+                              <th>Status</th>
                               <th></th>
                           </tr>
                       </thead>
@@ -102,22 +109,24 @@
                           {
                               foreach (var item in Model.Where(k => k.InvoiceStatus == "Completed"))
                               {
-                                  <tr>                                    
-                                      <td>@item.InvoiceNumber</td>
-                                      <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
-                                      <td>@item.ClientTypeID</td>
-                                      <td>@item.InvoiceJobNumber</td>
-                                      <td>@item.Vendor</td>
-                                      <td>@item.InvoiceTotal</td>
-                                      <td>@item.DefaultValue</td>
-                                      <td>@item.InvoiceNotes</td>
-                                      <td>@item.InvoiceStatus</td>    
-                                      <td>
-                                          @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
-                                          <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
-                                          @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
-                                      </td>
-                                  </tr>
+                          <tr>
+                              <td>@Html.CheckBox("a", new { @class = "dt-checkboxes", value = item.InvoiceID,sta = item.InvoiceDate })</td>
+                              <td>@item.InvoiceNumber</td>
+                              <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
+                              <td>@item.ClientTypeID</td>
+                              <td>@item.InvoiceJobNumber</td>
+                              <td>@item.Vendor</td>
+                              <td>@item.InvoiceVendor</td>
+                              <td>@item.InvoiceTotal</td>
+                              <td>@item.DefaultValue</td>
+                              <td>@item.InvoiceNotes</td>
+                              <td>@item.InvoiceStatus</td>
+                              <td>
+                                  @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
+                                  <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                                  @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
+                              </td>
+                          </tr>
                               }
                           }
                       </tbody>
@@ -162,19 +171,74 @@
                 pageLength: 200,
                 autoWidth: false,
                 "bInfo": false,
-                "aaSorting": [[0, "desc"]],
+                "aaSorting": [[1,"desc"]],
                 searching: true,
             });
             $('.Datepicker').datepicker("setDate", new Date());
-
             $('.Datepicker').datepicker();
+
+            //To select all checkboxes
+
+            $("#select_all").click(function () {
+                $(".dt-checkboxes").each(function (index) {
+                    var checked = $("#select_all").prop('checked');
+                    var tarvalue = this.getAttribute('sta')
+                    var d = new Date();
+                    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    var firstDay =
+                        new Date(d.getFullYear(), d.getMonth(), 1); 
+                    var Month1 = months[d.getMonth()];
+                    var date = d.getDate();
+                    var month = d.getMonth() + 1;
+                    var year = d.getFullYear(); 
+                  
+                    function getFormattedDate() {
+                        var d = new Date();
+                        let year = d.getFullYear();
+                        let month = (1 + d.getMonth()).toString().padStart(2, '0');
+                        let day = d.getDate().toString().padStart(2, '0');
+                        var result = month + '/' + day + '/' + year;
+                        return month + '/' + day + '/' + year;
+                    }
+                    let ds = new Date(tarvalue); //dd-mm-yyyy
+                   var res=ds.getMonth() + 1;
+                    if ((tarvalue < getFormattedDate()) && (res<month)) {
+                        $(this).prop('checked', checked)
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                    //$(".dt-checkboxes").prop('checked', $(this).prop('checked'));
+                })
+            });
+
         });
         
         function NewInvoice() {
    var loadurl = '@Url.Action("AddnewInvoice", "Invoice")';
             location.href = loadurl;
-        }        
+        }      
 
+        function ArchiveInvoices() {
+            var colors = [];
+            $('#Comptinvoice_id').find('.dt-checkboxes:checked').each(function (i) {
+                colors[i] = $(this).val();
+            });          
+            var d = new Date();
+            var n = d.getMonth();      
+            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var Month = months[d.getMonth()];
+            //if (tarvalue < Month) {
+                if (confirm('Are you sure you want to archive Invoices?')) {
+                    jQuery.ajax({
+                        url: '@Url.Action("ArchiveMonthInvoices", "Invoice")',
+                        method: 'Post',
+                        data: { ArchInvoices: colors }
+                    }).done(function (response) {
+                        window.location = '@Url.Action("Invoices", "Invoice")';
+                    }).fail(function () {
+                    });
+                }
+        }
 
     </script>
 }

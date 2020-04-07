@@ -1,0 +1,121 @@
+﻿@model WISModels.EstimateDetailModel
+@if (Model != null)
+{
+
+    using (Html.BeginForm("SaveEditEstimatedtls", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmEditDetails" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(p => p.EstimateDetailID)
+        @Html.HiddenFor(p => p.EstimateID)
+        @Html.HiddenFor(m => m.ItemCategoryID)
+        <div class="form-horizontal">
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div id="dropdowndiv">
+                <div class="form-group">
+                    <label class="control-label col-xs-4 ">Category</label>
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.ItemCategoryID, ViewBag.Category as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control", onchange = "javaScript:GetItemInventoryList()" })
+                        @Html.ValidationMessageFor(model => model.ItemCategoryID, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-xs-4 ">ItemID</label>
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.ItemInventoryID, ViewBag.Inventory as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control", @onchange = "javascript:GetExisProdDetails();" })
+
+                        @Html.ValidationMessageFor(model => model.ItemInventoryID, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.EstimateDescription, new { @class = "form-control" })
+
+                    </div>
+                </div>
+            </div>
+            <div id="textboxdiv" style="display:none">
+                <div class="form-group">
+                    <label class="control-label col-xs-4 ">Category</label>
+                    <div class="col-md-8">
+                        @Html.TextBoxFor(model => model.Categories, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Categories, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-xs-4 ">Item</label>
+                    <div class="col-md-8">
+                        @Html.TextBoxFor(model => model.NonInventoryItem, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ItemInventoryID, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.NonInventoryItem, new { @class = "form-control" })
+
+                    </div>
+                </div>
+            </div>
+            @Html.HiddenFor(m => m.Categories)
+
+            @Html.HiddenFor(m => m.ItemInventoryID)
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">ItemUnitCost</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.ItemInventoryCost, new { @class = "form-control", onchange = "javascript:PopulateItmTotal()" })
+                    @Html.ValidationMessageFor(model => model.ItemInventoryCost, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">EstimateQuantity</label>
+                <div class="col-md-8">
+                    @Html.Hidden("prePrice", Model.EstimateDetailQuantity)
+                    @Html.TextBoxFor(model => model.EstimateDetailQuantity, new { @class = "form-control", onchange = "javascript:PopulateItmTotal()", id = "EstimateQuantity" })
+                    @Html.ValidationMessageFor(model => model.EstimateDetailQuantity, "", new { @class = "text-danger" })
+                    Current Quantity:<span id="currentqty">@Model.EstimateDetailQuantity</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">EstimateLineItemTotal</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.EstimateDetailLineItemTotal, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.EstimateDetailLineItemTotal, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-4 ">EstimateCostCodeGL</label>
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.EstimateDetailCostCodeGL, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.EstimateDetailCostCodeGL, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnSave" type="button" style="margin-left: 50px;" data-toggle="modal" onclick="EditSaveEstItem();">Save</button>
+                <button class="btn btn-primary" id="btnclose" data-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    }
+
+}
+
+
+@section Scripts{
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.auto-complete.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.ui.autocomplete.scroll.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var result = '@ViewBag.Result';
+            if (result != "") {
+                alert(result + " is Out of Stock");
+                result = "";
+            }
+            $('.Datepicker').datepicker("setDate", new Date());
+
+            $('.Datepicker').datepicker();
+            hide();
+        });
+
+
+
+    </script>
+    }

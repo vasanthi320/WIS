@@ -78,6 +78,12 @@
     <Compile Include="tblEmployeeLocation.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="tblEstimate.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="tblEstimateDetail.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="tblExternalClient.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

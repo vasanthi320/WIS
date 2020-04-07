@@ -46,6 +46,8 @@
     <Compile Include="DefaultModel.cs" />
     <Compile Include="EmployeeLocation.cs" />
     <Compile Include="EmployeeModel.cs" />
+    <Compile Include="EstimateDetailModel.cs" />
+    <Compile Include="EstimateModel.cs" />
     <Compile Include="ExternalClientModel.cs" />
     <Compile Include="InvoiceDetailModel.cs" />
     <Compile Include="InvoiceModel.cs" />

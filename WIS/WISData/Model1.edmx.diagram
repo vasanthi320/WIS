@@ -21,6 +21,10 @@
         <EntityTypeShape EntityType="WISModel.tblDefault" Width="1.5" PointX="10.375" PointY="0.75" />
         <EntityTypeShape EntityType="WISModel.tblInvoice" Width="1.5" PointX="8.375" PointY="12" />
         <AssociationConnector Association="WISModel.FK_tblInvoiceDetail_tblInvoice" />
+        <EntityTypeShape EntityType="WISModel.tblEstimateDetail" Width="1.5" PointX="12.625" PointY="9.125" />
+        <AssociationConnector Association="WISModel.FK_tblEstimateDetail_tblItemInventory" />
+        <EntityTypeShape EntityType="WISModel.tblEstimate" Width="1.5" PointX="4.375" PointY="14" />
+        <AssociationConnector Association="WISModel.FK_tblEstimateDetail_tblEstimates" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

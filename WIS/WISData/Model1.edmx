@@ -40,6 +40,41 @@
           <Property Name="LocationID" Type="int" Nullable="false" />
           <Property Name="UseAllAsDefault" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="tblEstimateDetail">
+          <Key>
+            <PropertyRef Name="EstimateDetailID" />
+          </Key>
+          <Property Name="EstimateDetailID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EstimateID" Type="int" Nullable="false" />
+          <Property Name="ItemInventoryID" Type="int" />
+          <Property Name="EstimateDescription" Type="nvarchar" MaxLength="100" />
+          <Property Name="NonInventoryItem" Type="nvarchar" MaxLength="250" />
+          <Property Name="EstimateDetailCostCodeGL" Type="varchar" MaxLength="20" />
+          <Property Name="ItemInventoryCost" Type="numeric" Precision="12" Scale="2" />
+          <Property Name="EstimateDetailQuantity" Type="int" />
+          <Property Name="EstimateDetailLineItemTotal" Type="numeric" Precision="12" Scale="2" />
+        </EntityType>
+        <EntityType Name="tblEstimates">
+          <Key>
+            <PropertyRef Name="EstimateId" />
+          </Key>
+          <Property Name="EstimateId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EstimateNumber" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="EstimateDate" Type="datetime" Nullable="false" />
+          <Property Name="ClientName" Type="nvarchar" MaxLength="50" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="Total" Type="numeric" Precision="12" Scale="2" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" />
+          <Property Name="ExternalClientID" Type="int" />
+          <Property Name="ClientTypeID" Type="int" />
+          <Property Name="LocationID" Type="int" />
+          <Property Name="EmployeeID" Type="int" />
+          <Property Name="Vendor#" Type="varchar" MaxLength="50" />
+          <Property Name="VendoeEstimate" Type="varchar" MaxLength="100" />
+          <Property Name="EstimateTerms" Type="varchar(max)" />
+          <Property Name="EstimateNotes" Type="varchar(max)" />
+          <Property Name="CreatedUser" Type="varchar" MaxLength="50" />
+        </EntityType>
         <EntityType Name="tblExternalClient">
           <Key>
             <PropertyRef Name="ExternalClientID" />
@@ -74,6 +109,7 @@
           <Property Name="InvoiceStatus" Type="varchar" MaxLength="50" />
           <Property Name="CreatedDate" Type="datetime2" Precision="7" Nullable="false" />
           <Property Name="CreatedUser" Type="varchar" MaxLength="50" />
+          <Property Name="IsArchived" Type="bit" />
         </EntityType>
         <EntityType Name="tblInvoiceDetail">
           <Key>
@@ -185,6 +221,30 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="LocationDescription" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="LocationState" Type="char" MaxLength="2" Nullable="false" />
         </EntityType>
+        <Association Name="FK_tblEstimateDetail_tblEstimates">
+          <End Role="tblEstimates" Type="Self.tblEstimates" Multiplicity="1" />
+          <End Role="tblEstimateDetail" Type="Self.tblEstimateDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblEstimates">
+              <PropertyRef Name="EstimateId" />
+            </Principal>
+            <Dependent Role="tblEstimateDetail">
+              <PropertyRef Name="EstimateID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblEstimateDetail_tblItemInventory">
+          <End Role="tblItemInventory" Type="Self.tblItemInventory" Multiplicity="0..1" />
+          <End Role="tblEstimateDetail" Type="Self.tblEstimateDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblItemInventory">
+              <PropertyRef Name="ItemInventoryID" />
+            </Principal>
+            <Dependent Role="tblEstimateDetail">
+              <PropertyRef Name="ItemInventoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_tblInvoiceDetail_tblInvoice">
           <End Role="tblInvoice" Type="Self.tblInvoice" Multiplicity="1" />
           <End Role="tblInvoiceDetail" Type="Self.tblInvoiceDetail" Multiplicity="*" />
@@ -226,6 +286,8 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <EntitySet Name="tblDefault" EntityType="Self.tblDefault" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblEmployee" EntityType="Self.tblEmployee" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblEmployeeLocation" EntityType="Self.tblEmployeeLocation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblEstimateDetail" EntityType="Self.tblEstimateDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblEstimates" EntityType="Self.tblEstimates" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblExternalClient" EntityType="Self.tblExternalClient" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblInvoice" EntityType="Self.tblInvoice" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblInvoiceDetail" EntityType="Self.tblInvoiceDetail" Schema="dbo" store:Type="Tables" />
@@ -244,6 +306,14 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
     [tblInvoiceSummary].[UpdatedDate] AS [UpdatedDate]
     FROM [dbo].[tblInvoiceSummary] AS [tblInvoiceSummary]</DefiningQuery>
           </EntitySet>
+          <AssociationSet Name="FK_tblEstimateDetail_tblEstimates" Association="Self.FK_tblEstimateDetail_tblEstimates">
+            <End Role="tblEstimates" EntitySet="tblEstimates" />
+            <End Role="tblEstimateDetail" EntitySet="tblEstimateDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblEstimateDetail_tblItemInventory" Association="Self.FK_tblEstimateDetail_tblItemInventory">
+            <End Role="tblItemInventory" EntitySet="tblItemInventory" />
+            <End Role="tblEstimateDetail" EntitySet="tblEstimateDetail" />
+          </AssociationSet>
           <AssociationSet Name="FK_tblInvoiceDetail_tblInvoice" Association="Self.FK_tblInvoiceDetail_tblInvoice">
             <End Role="tblInvoice" EntitySet="tblInvoice" />
             <End Role="tblInvoiceDetail" EntitySet="tblInvoiceDetail" />
@@ -304,6 +374,16 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
             <End Role="tblInvoice" EntitySet="tblInvoices" />
             <End Role="tblInvoiceDetail" EntitySet="tblInvoiceDetails" />
           </AssociationSet>
+          <EntitySet Name="tblEstimateDetails" EntityType="WISModel.tblEstimateDetail" />
+          <AssociationSet Name="FK_tblEstimateDetail_tblItemInventory" Association="WISModel.FK_tblEstimateDetail_tblItemInventory">
+            <End Role="tblItemInventory" EntitySet="tblItemInventories" />
+            <End Role="tblEstimateDetail" EntitySet="tblEstimateDetails" />
+          </AssociationSet>
+          <EntitySet Name="tblEstimates" EntityType="WISModel.tblEstimate" />
+          <AssociationSet Name="FK_tblEstimateDetail_tblEstimates" Association="WISModel.FK_tblEstimateDetail_tblEstimates">
+            <End Role="tblEstimate" EntitySet="tblEstimates" />
+            <End Role="tblEstimateDetail" EntitySet="tblEstimateDetails" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="tblItemInventoryAudit">
           <Key>
@@ -358,6 +438,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="ModUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="tblLocation" Relationship="WISModel.FK_tblItemInventory_tblLocation" FromRole="tblItemInventory" ToRole="tblLocation" />
           <NavigationProperty Name="tblInvoiceDetails" Relationship="WISModel.FK_tblInvoiceDetail_tblItemInventory" FromRole="tblItemInventory" ToRole="tblInvoiceDetail" />
+          <NavigationProperty Name="tblEstimateDetails" Relationship="WISModel.FK_tblEstimateDetail_tblItemInventory" FromRole="tblItemInventory" ToRole="tblEstimateDetail" />
         </EntityType>
         <Association Name="FK_tblItemInventory_tblLocation">
           <End Type="WISModel.tblLocation" Role="tblLocation" Multiplicity="0..1" />
@@ -495,6 +576,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="7" />
           <Property Name="CreatedUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="tblInvoiceDetails" Relationship="WISModel.FK_tblInvoiceDetail_tblInvoice" FromRole="tblInvoice" ToRole="tblInvoiceDetail" />
+          <Property Name="IsArchived" Type="Boolean" />
         </EntityType>
         <Association Name="FK_tblInvoiceDetail_tblInvoice">
           <End Type="WISModel.tblInvoice" Role="tblInvoice" Multiplicity="1" />
@@ -505,6 +587,68 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
             </Principal>
             <Dependent Role="tblInvoiceDetail">
               <PropertyRef Name="InvoiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tblEstimateDetail">
+          <Key>
+            <PropertyRef Name="EstimateDetailID" />
+          </Key>
+          <Property Name="EstimateDetailID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EstimateID" Type="Int32" Nullable="false" />
+          <Property Name="ItemInventoryID" Type="Int32" />
+          <Property Name="EstimateDescription" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="NonInventoryItem" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="EstimateDetailCostCodeGL" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ItemInventoryCost" Type="Decimal" Precision="12" Scale="2" />
+          <Property Name="EstimateDetailQuantity" Type="Int32" />
+          <Property Name="EstimateDetailLineItemTotal" Type="Decimal" Precision="12" Scale="2" />
+          <NavigationProperty Name="tblItemInventory" Relationship="WISModel.FK_tblEstimateDetail_tblItemInventory" FromRole="tblEstimateDetail" ToRole="tblItemInventory" />
+          <NavigationProperty Name="tblEstimate" Relationship="WISModel.FK_tblEstimateDetail_tblEstimates" FromRole="tblEstimateDetail" ToRole="tblEstimate" />
+        </EntityType>
+        <Association Name="FK_tblEstimateDetail_tblItemInventory">
+          <End Type="WISModel.tblItemInventory" Role="tblItemInventory" Multiplicity="0..1" />
+          <End Type="WISModel.tblEstimateDetail" Role="tblEstimateDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblItemInventory">
+              <PropertyRef Name="ItemInventoryID" />
+            </Principal>
+            <Dependent Role="tblEstimateDetail">
+              <PropertyRef Name="ItemInventoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tblEstimate">
+          <Key>
+            <PropertyRef Name="EstimateId" />
+          </Key>
+          <Property Name="EstimateId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EstimateNumber" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="EstimateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ClientName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Total" Type="Decimal" Precision="12" Scale="2" />
+          <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ExternalClientID" Type="Int32" />
+          <Property Name="ClientTypeID" Type="Int32" />
+          <Property Name="LocationID" Type="Int32" />
+          <Property Name="EmployeeID" Type="Int32" />
+          <Property Name="Vendor_" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="VendoeEstimate" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EstimateTerms" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="EstimateNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tblEstimateDetails" Relationship="WISModel.FK_tblEstimateDetail_tblEstimates" FromRole="tblEstimate" ToRole="tblEstimateDetail" />
+        </EntityType>
+        <Association Name="FK_tblEstimateDetail_tblEstimates">
+          <End Type="WISModel.tblEstimate" Role="tblEstimate" Multiplicity="1" />
+          <End Type="WISModel.tblEstimateDetail" Role="tblEstimateDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblEstimate">
+              <PropertyRef Name="EstimateId" />
+            </Principal>
+            <Dependent Role="tblEstimateDetail">
+              <PropertyRef Name="EstimateID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -680,6 +824,7 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
           <EntitySetMapping Name="tblInvoices">
             <EntityTypeMapping TypeName="WISModel.tblInvoice">
               <MappingFragment StoreEntitySet="tblInvoice">
+                <ScalarProperty Name="IsArchived" ColumnName="IsArchived" />
                 <ScalarProperty Name="CreatedUser" ColumnName="CreatedUser" />
                 <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
                 <ScalarProperty Name="InvoiceStatus" ColumnName="InvoiceStatus" />
@@ -696,6 +841,43 @@ warning 6002: The table/view 'WIS.dbo.tblInvoiceSummary' does not have a primary
                 <ScalarProperty Name="InvoiceDate" ColumnName="InvoiceDate" />
                 <ScalarProperty Name="InvoiceNumber" ColumnName="InvoiceNumber" />
                 <ScalarProperty Name="InvoiceID" ColumnName="InvoiceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEstimateDetails">
+            <EntityTypeMapping TypeName="WISModel.tblEstimateDetail">
+              <MappingFragment StoreEntitySet="tblEstimateDetail">
+                <ScalarProperty Name="EstimateDetailLineItemTotal" ColumnName="EstimateDetailLineItemTotal" />
+                <ScalarProperty Name="EstimateDetailQuantity" ColumnName="EstimateDetailQuantity" />
+                <ScalarProperty Name="ItemInventoryCost" ColumnName="ItemInventoryCost" />
+                <ScalarProperty Name="EstimateDetailCostCodeGL" ColumnName="EstimateDetailCostCodeGL" />
+                <ScalarProperty Name="NonInventoryItem" ColumnName="NonInventoryItem" />
+                <ScalarProperty Name="EstimateDescription" ColumnName="EstimateDescription" />
+                <ScalarProperty Name="ItemInventoryID" ColumnName="ItemInventoryID" />
+                <ScalarProperty Name="EstimateID" ColumnName="EstimateID" />
+                <ScalarProperty Name="EstimateDetailID" ColumnName="EstimateDetailID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEstimates">
+            <EntityTypeMapping TypeName="WISModel.tblEstimate">
+              <MappingFragment StoreEntitySet="tblEstimates">
+                <ScalarProperty Name="CreatedUser" ColumnName="CreatedUser" />
+                <ScalarProperty Name="EstimateNotes" ColumnName="EstimateNotes" />
+                <ScalarProperty Name="EstimateTerms" ColumnName="EstimateTerms" />
+                <ScalarProperty Name="VendoeEstimate" ColumnName="VendoeEstimate" />
+                <ScalarProperty Name="Vendor_" ColumnName="Vendor#" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="LocationID" ColumnName="LocationID" />
+                <ScalarProperty Name="ClientTypeID" ColumnName="ClientTypeID" />
+                <ScalarProperty Name="ExternalClientID" ColumnName="ExternalClientID" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Total" ColumnName="Total" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ClientName" ColumnName="ClientName" />
+                <ScalarProperty Name="EstimateDate" ColumnName="EstimateDate" />
+                <ScalarProperty Name="EstimateNumber" ColumnName="EstimateNumber" />
+                <ScalarProperty Name="EstimateId" ColumnName="EstimateId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

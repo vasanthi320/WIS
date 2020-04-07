@@ -210,9 +210,12 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Email\AccountingInvoice.html" />
+    <Content Include="Content\Email\Estimate.html" />
     <Content Include="Content\Email\Invoice.html" />
     <Content Include="Content\img\download %282%29.jpg" />
     <Content Include="Content\img\download %283%29.jpg" />
+    <Content Include="Content\img\ES_Hoar-HPM.png" />
+    <Content Include="Content\img\ES_Hoar.png" />
     <Content Include="Content\img\HOAR_logo.png" />
     <Content Include="Content\img\HOAR_no_border.png" />
     <Content Include="Content\img\PrimaryLogoSm.png" />
@@ -294,13 +297,25 @@
     <Content Include="Views\Inventory\_AddExisProdInventory.cshtml" />
     <Content Include="Views\Invoice\_editInvoiceDetails.cshtml" />
     <Content Include="Views\Invoice\InvoiceSummary.cshtml" />
-    <Content Include="Views\Invoice\editInvoice.cshtml" />
     <Content Include="Views\Report\Reports.cshtml" />
     <Content Include="Views\Invoice\PrintSummary.cshtml" />
     <Content Include="Views\Invoice\ExternalClient.cshtml" />
     <Content Include="Views\Report\_InvoiceMonthSummary.cshtml" />
     <Content Include="Views\Invoice\_editpopupInvoiceItem.cshtml" />
     <Content Include="Views\Shared\_PopupLayout.cshtml" />
+    <Content Include="Views\Invoice\Estimates.cshtml" />
+    <Content Include="Views\Invoice\AddEstimateItem.cshtml" />
+    <Content Include="Views\Invoice\_estimateDetails.cshtml" />
+    <Content Include="Views\Invoice\_PopupEstimateItem.cshtml" />
+    <Content Include="Views\Invoice\EstimateSummary.cshtml" />
+    <Content Include="Views\Invoice\PrintEstSummary.cshtml" />
+    <Content Include="Views\Invoice\_editEstimateDetails.cshtml" />
+    <Content Include="Views\Invoice\editEstimate.cshtml" />
+    <Content Include="Views\Invoice\editInvoice.cshtml" />
+    <Content Include="Views\Invoice\_editPopupEstimateItem.cshtml" />
+    <Content Include="Views\Invoice\ArchivedInvoices.cshtml" />
+    <Content Include="Views\Report\GlCodesData.cshtml" />
+    <Content Include="Views\Report\_InvoiceGLSummary.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

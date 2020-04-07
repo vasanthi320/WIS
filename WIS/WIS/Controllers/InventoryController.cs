@@ -123,10 +123,45 @@ namespace WIS.Controllers
                 var service = new WISService();
                 model.CreatedUser = User.Identity.Name;
                 var emodel = service.GetInventoryDataById(model.ItemInventoryID);
+                //model.ItemInventoryNumber = emodel.ItemInventoryNumber;                  
+                id = service.SaveEditItmProd(model);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("could not  Save The Details", ex);
+            }
+            return RedirectToAction("ProductsInventory", "Inventory");
+        }
+        public ActionResult SaveAddEditItemProdTypes1(ItemInventoryModel model)
+        {
+            int id = 0;
+
+            try
+            {
+                var service = new WISService();
+                model.CreatedUser = User.Identity.Name;
+                var emodel = service.GetInventoryDataById(model.ItemInventoryID);
                 model.ItemInventoryNumber = emodel.ItemInventoryNumber;
-                model.ItemInventoryDescription = emodel.ItemInventoryDescription;
-                model.ItemInventorySalesPrice = emodel.ItemInventorySalesPrice;
                 model.ItemInventoryReplacementCost = emodel.ItemInventoryReplacementCost;
+                model.ItemInventorySalesPrice = emodel.ItemInventorySalesPrice;
+                model.ItemInventoryDescription = emodel.ItemInventoryDescription;
+                id = service.SaveEditItmProd(model);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("could not  Save The Details", ex);
+            }
+            return RedirectToAction("ProductsInventory", "Inventory");
+        }
+        //Save Items for new Inventory
+        public ActionResult SaveAddNewItemProdTypes(ItemInventoryModel model)
+        {
+            int id = 0;
+
+            try
+            {
+                var service = new WISService();
+                model.CreatedUser = User.Identity.Name;
                 id = service.SaveEditItmProd(model);
             }
             catch (Exception ex)

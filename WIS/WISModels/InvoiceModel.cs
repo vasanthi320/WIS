@@ -46,9 +46,8 @@ namespace WISModels
         public string CreatedUser { get; set; }
         //public string InvoiceOrderedBy { get; set; }
         public System.DateTime UpdatedDate { get; set; }
-
+        public bool IsArchived { get; set; }
     }
-
     public class InvoicegData
     {
         public string MonthName
@@ -66,7 +65,6 @@ namespace WISModels
     }
     public class InvoiceResult
     {
-
         public int InvoiceId { get; set; }
 
         public bool Status { get; set; }

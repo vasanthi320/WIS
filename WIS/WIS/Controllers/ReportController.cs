@@ -65,5 +65,33 @@ namespace WIS.Controllers
             var invcmontotal = model.Select(i=>i.InvoiceTotal).Sum();
             return Json(model, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult GlCodesData()
+        {
+            string GlCode = "";
+            var service = new WISService();
+            List<InvoiceDetailModel> GlLst = new List<InvoiceDetailModel>();
+            var model = service.GetGLInvoiceDetails(GlCode);
+            var Emodel = service.GetGL1InvoiceDetails(GlCode);
+            ViewBag.GL1Total = model.Select(i => i.InvoiceDetailLineItemTotal).Sum();
+            ViewBag.GL2Total = Emodel.Select(i => i.InvoiceDetailLineItemTotal).Sum();           
+            return View("GlCodesData", model);
+        }
+
+        public ActionResult GetGLCodeInvoiceSummary()
+        {
+            string GlCode = "";
+            var service = new WISService();
+            List<InvoiceModel> GlLst = new List<InvoiceModel>();
+            var model = service.GetGLInvoiceSummary(GlCode);                 
+            return View("_InvoiceGLSummary", model);
+        }
+        public ActionResult GetGL1CodeInvoiceSummary()
+        {
+            string GlCode = "";
+            var service = new WISService();
+            List<InvoiceModel> GlLst = new List<InvoiceModel>();
+            var model = service.GetGL1InvoiceSummary(GlCode);
+            return View("_InvoiceGLSummary", model);
+        }
     }
 }

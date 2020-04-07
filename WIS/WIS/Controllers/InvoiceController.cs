@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -22,22 +23,30 @@ namespace WIS.Controllers
             var model = service.GetInvoiceList();
             return View(model);
         }
+        public ActionResult Estimates()
+        {
+            var service = new WISService();
+            List<EstimateModel> est = new List<EstimateModel>();
+            var model = service.GetEstimatesList();
+            return View(model);
+        }
         public JsonResult GetProjects(string term)
         {
             var service = new WISService();
-            List<InvoiceModel> Iim = new List<InvoiceModel>();
+            //List<InvoiceModel> Iim = new List<InvoiceModel>();
             var Joblist = service.GetJobDetails();
             var jobName = Joblist.Where(n => (n.JobDescription).StartsWith(term));
             return Json(jobName, JsonRequestBehavior.AllowGet);
-        }
+        }      
         public JsonResult GetCategories(string term)
         {
             var service = new WISService();
-            List<InvoiceDetailModel> Iim = new List<InvoiceDetailModel>();
+            //List<InvoiceDetailModel> Iim = new List<InvoiceDetailModel>();
             var Catlist = service.GetItemCategories();
             var CategoryName = Catlist.Where(n => (n.ItemCategoryDescription).StartsWith(term))/*.OrderByDescending(p => p.ItemCategoryDescription).ToList()*/;
             return Json(CategoryName, JsonRequestBehavior.AllowGet);
         }
+       
         public ActionResult EditInvoice(int InvoiceId)
         {
             var service = new WISService();
@@ -57,27 +66,56 @@ namespace WIS.Controllers
             ViewBag.Location = service.GetLocationList().
                Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString()}).ToList();
             ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
-            if (model.Employee != null && model.Employee != "" && model.Employee != "NULL") 
-              ViewBag.Employee1 = service.GetEmployeeDtlsById(Convert.ToInt32(model.Employee)).FirstName;
+            if (model.Employee != null && model.Employee != "" && model.Employee != "NULL")
+            {               
+                //ViewBag.Employee1 = service.GetEmployeeDtlsById(Convert.ToInt32(model.Employee)).FirstName;
+                ViewBag.Employee1 = model.Employee;
+            }
             model.defaultdetails = service.GetDefaultDetailsfromDb();
 
             if (model.InvoiceID > 0)
-            {
-               // model.employID = ViewBag.Employee1;
-                // HttpContext.Session["Invoice"] = model;
+            {               
                 return View("editInvoice", model);
             }
             
             model.LocationID = Emplocation;
             return View("AddInvoiceItem", model);
         }
+        public ActionResult EditEstimate(int Estimate)
+        {
+            var service = new WISService();
+            HttpContext.Session["Estimates"] = null;
+            var useremail = GetUserEmail(User.Identity.Name);
+            var empdetails = service.GetEmployeeDetails().Where(p => p.Email == useremail).SingleOrDefault().EmployeeID;
+            var emp = service.GetEmpLocation(empdetails);
+            var Emplocation = emp != null ? emp.LocationID : 1;
+
+            var model = service.GetEstimateDetails(Estimate);
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();           
+            //Changed on 03/09/2020
+            ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.JobDescription, Value = p.Job.ToString() }).ToList();
+            ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString(), Selected = p.EmployeeID.ToString() == model.Employee }).ToList();
+            ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
+            ViewBag.Location = service.GetLocationList().
+               Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString() }).ToList();
+            ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
+            if (model.Employee != null && model.Employee != "" && model.Employee != "NULL")
+                ViewBag.Employee1 = service.GetEmployeeDtlsById(Convert.ToInt32(model.Employee)).FirstName;
+            model.defaultdetails = service.GetDefaultDetailsfromDb();
+
+            if (model.Estimate > 0)
+            {                
+                return View("editEstimate", model);
+            }
+
+            model.LocationID = Emplocation;
+            return View("AddEstimateItem", model);
+        }
         public ActionResult AddnewInvoice(string mesg = "")
         {
             var service = new WISService();
             ViewBag.Result = mesg;
-            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name));
-           
-           // loc = loc == "All" ? "Bessemer" : loc;                   
+                         
             ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString() }).ToList();
 
             var useremail = GetUserEmail(User.Identity.Name);
@@ -99,7 +137,27 @@ namespace WIS.Controllers
             model.defaultdetails = service.GetDefaultDetailsfromDb();
             return View("AddInvoiceItem", model);            
         }
-     
+        public ActionResult AddnewEstimate(string mesg = "")
+        {
+            var service = new WISService();
+            ViewBag.Result = mesg;                              
+            ViewBag.Employee = service.GetEmployeeDetails().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.EmployeeID.ToString() }).ToList();
+
+            var useremail = GetUserEmail(User.Identity.Name);
+            var empdetails = service.GetEmployeeDetails().Where(p => p.Email == useremail).SingleOrDefault().EmployeeID;            
+            var emp = service.GetEmpLocation(empdetails);
+            var Emplocation = emp != null ? emp.LocationID : 1;
+            ViewBag.client = service.GetClient().Select(p => new SelectListItem { Text = p.ClientTypeDescription, Value = p.ClientTypeID.ToString() }).ToList();
+
+            ViewBag.Location = service.GetLocationList().Select(p => new SelectListItem { Text = p.LocationDescription, Value = p.LocationID.ToString() }).ToList();
+            ViewBag.ExternalClient = service.GetExternalClientList().Select(p => new SelectListItem { Text = p.FirstName + " " + p.LastName, Value = p.ExternalClientID.ToString() }).ToList();
+            var model = HttpContext.Session["Estimates"] as EstimateModel ?? new EstimateModel();
+            model.EstimateDetails = model.EstimateDetails ?? new List<EstimateDetailModel>();
+            model.ClientTypeID = 2;
+            model.LocationID = Emplocation;
+            model.defaultdetails = service.GetDefaultDetailsfromDb();
+            return View("AddEstimateItem", model);
+        }
         public SelectList ToSelectList(List<LocationModel> loclist)
         {
             var service = new WISService();
@@ -115,22 +173,30 @@ namespace WIS.Controllers
                     Value = Convert.ToString(p.LocationID)
                 });
             }
-
             return new SelectList(list, "Value", "Text");
         }
         public ActionResult PopupAddInvoiceItem(int Location)
         {
             var service = new WISService();
-            var model = new InvoiceDetailModel();
-            //string loc = service.GetEmpLocation(GetUserEmail(User.Identity.Name)); 
-            //ViewBag.Inventory = service.GetInventoryData().Where(x => x.ItemInventoryQuantity != 0 && x.LocationID == Location).Select(p => new SelectListItem { Text = p.ItemInventoryDescription, Value = p.ItemInventoryID.ToString() + "|" + p.ItemInventorySalesPrice + "|" + p.ItemInventoryQuantity }).ToList();
+            var model = new InvoiceDetailModel();           
             var Inventorylst = new List<SelectListItem>();            
             Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
             Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });                    
-            ViewBag.Inventory = Inventorylst;            
-           ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
+            ViewBag.Inventory = Inventorylst;  
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
            
             return View("_popupInvoiceItem", model);
+        }
+        public ActionResult PopupAddEstimateItem(int Location)
+        {
+            var service = new WISService();
+            var model = new EstimateDetailModel();          
+            var Inventorylst = new List<SelectListItem>();
+            Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
+            Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });
+            ViewBag.Inventory = Inventorylst;
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
+            return View("_popupEstimateItem", model);
         }
         public ActionResult EditPopupAddInvoiceItem(int Location)
         {
@@ -139,9 +205,20 @@ namespace WIS.Controllers
             var Inventorylst = new List<SelectListItem>();
             Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
             Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });
-            ViewBag.Inventory = Inventorylst;          
+            ViewBag.Inventory = Inventorylst;            
             ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();          
             return View("_editpopupInvoiceItem", model);
+        }
+        public ActionResult EditPopupAddEstimateItem(int Location)
+        {
+            var service = new WISService();
+            var model = new EstimateDetailModel();
+            var Inventorylst = new List<SelectListItem>();
+            Inventorylst.Add(new SelectListItem { Text = "Yes", Value = "1" });
+            Inventorylst.Add(new SelectListItem { Text = "No", Value = "2" });
+            ViewBag.Inventory = Inventorylst;
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
+            return View("_editpopupEstimateItem", model);
         }
         [HttpPost]
         public ActionResult AddInvoiceItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText,int locaton)
@@ -158,7 +235,21 @@ namespace WIS.Controllers
             lst.LocationID = locaton;
             return View("_InvoiceDetails", lst.InvoiceDetails);
         }
-
+        [HttpPost]
+        public ActionResult AddEstimateItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText, int locaton)
+        {
+            var lst = HttpContext.Session["Estimates"] as EstimateModel ?? new EstimateModel();
+            if (lst.EstimateDetails == null)
+            {
+                lst.EstimateDetails = new List<EstimateDetailModel>();
+            }
+            lst.EstimateDetails.Add(new EstimateDetailModel { EstimateDetailID = lst.EstimateDetails.Count, EstimateDescription = desc, ItemInventoryID = Id, EstimateDetailQuantity = qty, ItemInventoryCost = price, EstimateDetailLineItemTotal = qty * price, EstimateDetailCostCodeGL = CGCode, Categories = catText, ItemCategoryID = cat });
+            lst.Total = GetEstimateTotal(lst);
+            ViewBag.Total = lst.Total;
+            HttpContext.Session["Estimates"] = lst;
+            lst.LocationID = locaton;
+            return View("_estimateDetails", lst.EstimateDetails);
+        }
         [HttpPost]
         public ActionResult saveTermsValtoDb(string termsVal)
         {
@@ -174,10 +265,23 @@ namespace WIS.Controllers
                 lst.InvoiceDetails = new List<InvoiceDetailModel>();
             }
             lst.InvoiceDetails.Add(new InvoiceDetailModel { InvoiceDetailID = lst.InvoiceDetails.Count,  InvoiceDetailQuantity = qty, ItemInventoryUnitCost = price, InvoiceDetailLineItemTotal = qty * price, InvoiceDetailCostCodeGL = CGCode, NonInventoryItem = itm1 });
-            lst.InvoiceTotal = GetTotal(lst);
+            lst.InvoiceTotal = GetTotal(lst);           
             ViewBag.Total = lst.InvoiceTotal;
             HttpContext.Session["Invoice"] = lst;
             return View("_InvoiceDetails", lst.InvoiceDetails);
+        }
+        public ActionResult AddEstimateItems1(int Id, int qty, decimal price, string CGCode, string itm1, int EstimateId)
+        {
+            var lst = HttpContext.Session["Estimates"] as EstimateModel ?? new EstimateModel();
+            if (lst.EstimateDetails == null)
+            {
+                lst.EstimateDetails = new List<EstimateDetailModel>();
+            }
+            lst.EstimateDetails.Add(new EstimateDetailModel { EstimateDetailID = lst.EstimateDetails.Count, EstimateDetailQuantity = qty, ItemInventoryCost = price, EstimateDetailLineItemTotal = qty * price, EstimateDetailCostCodeGL = CGCode, NonInventoryItem = itm1 });
+            lst.Total = GetEstimateTotal(lst);
+            ViewBag.Total = lst.Total;
+            HttpContext.Session["Estimates"] = lst;
+            return View("_estimateDetails", lst.EstimateDetails);
         }
         public ActionResult EditAddInvoiceItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText,int InvoiceId)
         {
@@ -192,20 +296,50 @@ namespace WIS.Controllers
         {
             var service = new WISService();
             bool sucess = service.SaveInvoiceItem(InvoiceId, new InvoiceDetailModel { ItemInventoryID = Id==0 ? (int?)null :Id, InvoiceDetailQuantity = qty, ItemInventoryUnitCost = price, InvoiceDetailLineItemTotal = qty * price, InvoiceDetailCostCodeGL = CGCode, NonInventoryItem = itm1 });
-            var lst = service.GetInvoiceDetails(InvoiceId);
+            var lst = service.GetInvoiceDetails(InvoiceId);          
             lst.InvoiceTotal = GetTotal(lst);
             ViewBag.Total = lst.InvoiceTotal;
             return View("_InvoiceDetails", lst.InvoiceDetails);
+        }
+        public ActionResult EditAddEstimateItems(int Id, int qty, decimal price, string CGCode, string desc, int cat, string catText, int EstimateId)
+        {
+            var service = new WISService();
+            bool sucess = service.SaveEstimateItem(EstimateId, new EstimateDetailModel { EstimateDescription = desc, ItemInventoryID = Id, EstimateDetailQuantity = qty, ItemInventoryCost = price, EstimateDetailLineItemTotal = qty * price, EstimateDetailCostCodeGL = CGCode, Categories = catText, ItemCategoryID = cat });
+            var lst = service.GetEstimateDetails(EstimateId);
+            lst.Total = GetEstimateTotal(lst);
+            ViewBag.Total = lst.Total;
+            return View("_estimateDetails", lst.EstimateDetails);
+        }
+        public ActionResult EditAddEstimateItems1(int Id, int qty, decimal price, string CGCode, string itm1, int EstimateId)
+        {
+            var service = new WISService();
+            bool sucess = service.SaveEstimateItem(EstimateId, new EstimateDetailModel { ItemInventoryID = Id == 0 ? (int?)null : Id, EstimateDetailQuantity = qty, ItemInventoryCost = price, EstimateDetailLineItemTotal = qty * price, EstimateDetailCostCodeGL = CGCode, NonInventoryItem = itm1 });
+            var lst = service.GetEstimateDetails(EstimateId);
+            lst.Total = GetEstimateTotal(lst);
+            ViewBag.Total = lst.Total;
+            return View("_estimateDetails", lst.EstimateDetails);
         }
         public ActionResult GetInvoiceItems()
         {
             var lst = HttpContext.Session["Invoice"] as InvoiceModel ?? new InvoiceModel();
             return View("_InvoiceDetails", lst.InvoiceDetails);
         }
+        public ActionResult GetEstimateItems()
+        {
+            var lst = HttpContext.Session["Estimates"] as EstimateModel ?? new EstimateModel();
+            return View("_estimateDetails", lst.EstimateDetails);
+        }
         private decimal GetTotal(InvoiceModel e)
         {
             decimal m = 0;
             if (e.InvoiceDetails != null && e.InvoiceDetails.Any()) { m = e.InvoiceDetails.Sum(p => p.InvoiceDetailLineItemTotal.Value); }
+            var amt = Math.Round(m, 2);
+            return amt;
+        }
+        private decimal GetEstimateTotal(EstimateModel e)
+        {
+            decimal m = 0;
+            if (e.EstimateDetails != null && e.EstimateDetails.Any()) { m = e.EstimateDetails.Sum(p => p.EstimateDetailLineItemTotal.Value); }
             var amt = Math.Round(m, 2);
             return amt;
         }
@@ -243,21 +377,48 @@ namespace WIS.Controllers
                 return RedirectToAction("AddnewInvoice", new { mesg = res.Inventory });
             }
         }
+        //Save Estimates
+        public ActionResult SaveEstimateDetails(EstimateModel model)
+        {           
+            var Emodel = HttpContext.Session["Estimates"] as EstimateModel;
+            var service = new WISService();
+            model.EstimateDetails = Emodel.EstimateDetails;
+            Emodel.Total = GetEstimateTotal(Emodel);
+            model.Total = Emodel.Total;
+            model.CreatedUser = User.Identity.Name;
+            var email = GetUserEmail(model.CreatedUser);
+            var res = SaveEstimate(model);
+            if (res.Status)
+            {
+                model.Estimate = res.InvoiceId;
+                switch (model.Status)
+                {
+
+                    case "D": break;                  
+                    case "ME":
+                        SendEstimateEmail(model, email);
+                        break;
+                }
+                HttpContext.Session["Estimates"] = null;
+                return RedirectToAction("Estimates", "Invoice");
+            }
+            else
+            {
+                HttpContext.Session["Estimates"] = model;
+                return RedirectToAction("AddnewEstimate", new { mesg = res.Inventory });
+            }
+        }
         //Save Edit Invoice
         public ActionResult SaveEditInvoiceDetails(InvoiceModel model)
         {           
             var service = new WISService();           
             model.CreatedUser = User.Identity.Name;
-            var email = GetUserEmail(model.CreatedUser);
-            //var res = bool.TryParse(model.InvoiceStatus, out bool result);
-            var res =!string.IsNullOrEmpty(model.InvoiceStatus);
-            //var detls = service.GetInvoiceDetails(model.InvoiceID);
-            var emodel = service.updateInvoiceDetail(model);
-            // bool flag;
-            // if (Boolean.TryParse(model.InvoiceStatus, out flag))
+            var email = GetUserEmail(model.CreatedUser);           
+            var res =!string.IsNullOrEmpty(model.InvoiceStatus);            
+            var emodel = service.updateInvoiceDetail(model);           
             if (res)
              {                          
-                switch(emodel.InvoiceStatus)
+                switch(model.InvoiceStatus)
                 {
                     case "D": break;
                     case "A":
@@ -273,6 +434,33 @@ namespace WIS.Controllers
             else
             {
                 HttpContext.Session["Invoice"] = emodel;
+                return RedirectToAction("AddnewInvoice");
+            }
+        }
+        //Save Edit Estimate 
+        public ActionResult SaveEditEstimateDetails(EstimateModel model)
+        {
+            var service = new WISService();
+            model.CreatedUser = User.Identity.Name;
+            var email = GetUserEmail(model.CreatedUser);           
+            var res = !string.IsNullOrEmpty(model.Status);
+             var emodel = service.updateEstimateDetail(model);
+            
+            if (res)
+            {                
+                switch (model.Status)
+                {
+                    case "D": break;                       
+                    case "ME":
+                        SendEstimateEmail(model, email);
+                        break;
+                }
+                HttpContext.Session["Estimates"] = null;
+                return RedirectToAction("Estimates", "Invoice");
+            }
+            else
+            {
+                HttpContext.Session["Estimates"] = emodel;
                 return RedirectToAction("AddnewInvoice");
             }
         }
@@ -300,6 +488,30 @@ namespace WIS.Controllers
             }
              return PartialView("_editInvoiceDetails", model);
         }
+        //Edit Estimate details
+        public ActionResult EditEstimateDetailItem(int EstimateDetailID)
+        {
+            var service = new WISService();
+            EstimateDetailModel model;
+            ViewBag.Category = service.GetItemCategories().Select(p => new SelectListItem { Text = p.ItemCategoryDescription, Value = p.ItemCategoryID.ToString() }).ToList();
+
+            var Emodel = HttpContext.Session["Estimates"] as EstimateModel;
+            if (Emodel == null)
+            {
+                model = service.GetEstimateDataById(EstimateDetailID);
+            }
+            else
+            {
+                model = Emodel.EstimateDetails[EstimateDetailID];
+            }
+            ViewBag.Inventory = service.GetInventoryData().Where(x => x.ItemInventoryQuantity != 0 && x.ItemCategoryID == model.ItemCategoryID).Select(p => new SelectListItem { Text = p.ItemInventoryDescription, Value = p.ItemInventoryID.ToString() }).ToList();
+
+            if (model.EstimateDescription == null)
+            {
+                model.Categories = "NonInventory";
+            }
+            return PartialView("_editEstimateDetails", model);
+        }
         private InvoiceResult SaveInvoice(InvoiceModel model)
         {
             var service = new WISService();
@@ -316,7 +528,22 @@ namespace WIS.Controllers
             //SendInvoiceEmail(model);
             return res;
         }
+        private InvoiceResult SaveEstimate(EstimateModel model)
+        {
+            var service = new WISService();
+            if (string.IsNullOrEmpty(model.InvoiceJobNumber))
+            {
+                model.InvoiceJobNumber = "NULL";
+            }
+            else
+            {
+                model.InvoiceJobNumber = model.InvoiceJobNumber.Substring(0, 6);
+            }
+            var res = service.SaveEstimateDtls(model);
 
+            //SendInvoiceEmail(model);
+            return res;
+        }
         public ActionResult SaveEditInvoicedtls(InvoiceDetailModel model)
         {
             try
@@ -340,6 +567,30 @@ namespace WIS.Controllers
                 throw new Exception("could not  Save The Details", ex);
             }           
         }
+        public ActionResult SaveEditEstimatedtls(EstimateDetailModel model)
+        {
+            try
+            {
+                EstimateModel Emodel;
+                if (model.EstimateID > 0)
+                {
+                    var service = new WISService();
+                    //Emodel = service.SaveEditInvoicesDetails(model);
+                    Emodel = service.SaveEditEstimateDetails(model);
+                }
+                else
+                {
+                    Emodel = HttpContext.Session["Estimates"] as EstimateModel;
+                    Emodel.EstimateDetails[model.EstimateDetailID] = model;
+                    HttpContext.Session["Estimates"] = Emodel;
+                }
+                return View("_estimateDetails", Emodel.EstimateDetails);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("could not  Save The Details", ex);
+            }
+        }
 
         public ActionResult DeleteInvoiceDetailItem(int InvoiceDetailID)
         {
@@ -353,13 +604,30 @@ namespace WIS.Controllers
             }
             return View("_InvoiceDetails", Emodel.InvoiceDetails);
         }
+        public ActionResult DeleteEstimateDetailItem(int EstimateDetailId)
+        {
+            bool result = false;
+            var service = new WISService();
+            EstimateModel Emodel = HttpContext.Session["Estimates"] as EstimateModel;
+            if (Emodel.EstimateDetails.Any())
+            {
+                Emodel.EstimateDetails.RemoveAt(EstimateDetailId);
+                HttpContext.Session["Estimates"] = Emodel;
+            }
+            return View("_estimateDetails", Emodel.EstimateDetails);
+        }
         public ActionResult DeleteInvoiceDetailItemforEdit(int InvoiceId, int InvoiceDetailID)
         {
             var service = new WISService();          
             var result = service.DeleteInvoiceDetail(InvoiceDetailID, InvoiceId);
             return View("_InvoiceDetails", result.InvoiceDetails);
         }
-
+        public ActionResult DeleteEstimateDetailItemforEdit(int estimate, int EstimateDetailID)
+        {
+            var service = new WISService();
+            var result = service.DeleteEstimateDetail(EstimateDetailID, estimate);
+            return View("_InvoiceDetails", result.EstimateDetails);
+        }
         //Changed on 2/26/2020
         //public void SendInvoiceEmail(InvoiceModel model, string email, string status = "Completed")
         public void SendInvoiceEmail(InvoiceModel model, string email, string status = "Drafted")
@@ -377,7 +645,21 @@ namespace WIS.Controllers
             body = body.Replace("{2}", model.InvoiceID.ToString());
             emailService.SendMail(email, "An Invoice " + "WIS" + model.InvoiceID + " is " + status, body, "");           
         }
+        public void SendEstimateEmail(EstimateModel model, string email, string status = "Drafted")
+        {
+            var emailService = new Shared.EmailService();
 
+            string body = string.Empty;
+            using (StreamReader reader = new StreamReader(Server.MapPath("~/Content/Email/Estimate.html")))
+            {
+                body = reader.ReadToEnd();
+            }
+            body = body.Replace("{name}", GetUserFullname(model.CreatedUser));
+            body = body.Replace("{0}", Request.Url.Scheme);
+            body = body.Replace("{1}", Request.Url.Authority);
+            body = body.Replace("{2}", model.Estimate.ToString());
+            emailService.SendMail(email, "An Estimate " + "WES" + model.Estimate + " is " + status, body, "");
+        }
         public void SendAcctInvoiceEmail(InvoiceModel model, string email, string status = "Completed")
         {
             var emailService = new Shared.EmailService();
@@ -391,8 +673,7 @@ namespace WIS.Controllers
             body = body.Replace("{1}", Request.Url.Authority);
             body = body.Replace("{2}", model.InvoiceID.ToString());            
 
-            emailService.SendMail(email, "Invoice " + "WIS" + model.InvoiceID + " is " + status, body, "");
-            // return RedirectToAction("Invoices", "Invoice");
+            emailService.SendMail(email, "Invoice " + "WIS" + model.InvoiceID + " is " + status, body, "");           
         }
         public ActionResult GetInvoiceSummary(int InvoiceId)
         {
@@ -401,9 +682,9 @@ namespace WIS.Controllers
             ViewBag.id = Emodel.InvoiceID;
             if (Emodel.Employee != null && Emodel.Employee != "")
             {
-                var FirstName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).FirstName;
-                var LastName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).LastName;
-                ViewBag.EmployeeName = FirstName + " " + LastName;
+                //var FirstName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).FirstName;
+                //var LastName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).LastName;
+                ViewBag.EmployeeName = Emodel.Employee;
                 Emodel.Employee = ViewBag.EmployeeName;
             }
             if (Emodel.InvoiceJobNumber != null && Emodel.InvoiceJobNumber != "" && Emodel.InvoiceJobNumber != "NULL")
@@ -428,6 +709,39 @@ namespace WIS.Controllers
             HttpContext.Session["Invoice"] = null;
             return View("InvoiceSummary", Emodel);
         }
+        public ActionResult GetEstimateSummary(int Estimate)
+        {
+            var service = new WISService();
+            var Emodel = service.GetEstimateDetails(Estimate);
+            ViewBag.id = Emodel.Estimate;
+            if (Emodel.Employee != null && Emodel.Employee != "")
+            {
+                var FirstName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).FirstName;
+                var LastName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).LastName;
+                ViewBag.EmployeeName = FirstName + " " + LastName;
+                Emodel.Employee = ViewBag.EmployeeName;
+            }
+            if (Emodel.InvoiceJobNumber != null && Emodel.InvoiceJobNumber != "" && Emodel.InvoiceJobNumber != "NULL")
+            {
+                ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
+                ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
+                if (ViewBag.JCCO == 1)
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                }
+                else
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
+                }
+
+                ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
+                ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
+                ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
+                ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
+            }           
+            HttpContext.Session["Estimates"] = null;
+            return View("EstimateSummary", Emodel);
+        }
         public static string GetUserEmail(string userName)
         {
             var info = UserUtils.FindUserInfo(userName);
@@ -443,6 +757,37 @@ namespace WIS.Controllers
         {
             var service = new WISService();            
             var Emodel = service.GetInvoiceDetails(invoiceId);
+            ViewBag.Creator = GetUserFullname(Emodel.CreatedUser);
+            if (Emodel.Employee != null && Emodel.Employee != "")
+            {
+                //var FirstName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).FirstName;
+                //var LastName = service.GetEmployeeDtlsById(Convert.ToInt32(Emodel.Employee)).LastName;
+                ViewBag.EmployeeName = Emodel.Employee;
+                Emodel.Employee = ViewBag.EmployeeName;
+            }
+            if (Emodel.InvoiceJobNumber != null && Emodel.InvoiceJobNumber != "" && Emodel.InvoiceJobNumber != "NULL")
+            {
+                ViewBag.Job = service.GetJobDetails().Select(p => new SelectListItem { Text = p.Job + "" + p.JobDescription, Value = p.Job + "" + p.JobDescription.ToString() }).ToList();
+                ViewBag.JCCO = service.GetJobDetails(Emodel.InvoiceJobNumber).JCCo;
+                if (ViewBag.JCCO == 1)
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription;
+                }
+                else
+                {
+                    ViewBag.JobDes = service.GetJobDetails(Emodel.InvoiceJobNumber).JobDescription + " " + "CO2";
+                }
+                ViewBag.MailAddress = service.GetJobDetails(Emodel.InvoiceJobNumber).MailAddress;
+                ViewBag.MailCity = service.GetJobDetails(Emodel.InvoiceJobNumber).MailCity;
+                ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
+                ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
+            }
+            return View("PrintSummary", Emodel);
+        }
+        public ActionResult PrintSummaryEstimate(int estimate)
+        {
+            var service = new WISService();
+            var Emodel = service.GetEstimateDetails(estimate);
             ViewBag.Creator = GetUserFullname(Emodel.CreatedUser);
             if (Emodel.Employee != null && Emodel.Employee != "")
             {
@@ -468,9 +813,8 @@ namespace WIS.Controllers
                 ViewBag.MailState = service.GetJobDetails(Emodel.InvoiceJobNumber).MailState;
                 ViewBag.MailZip = service.GetJobDetails(Emodel.InvoiceJobNumber).MailZip;
             }
-            return View("PrintSummary", Emodel);
+            return View("PrintEstSummary", Emodel);
         }
-
         public ActionResult ExternalClientInfo()
         {
             var service = new WISService();
@@ -478,7 +822,6 @@ namespace WIS.Controllers
             ViewBag.State = GetStateInfo();
             return PartialView("ExternalClient", model);
         }
-
         public static IEnumerable<SelectListItem> GetStateInfo()
         {
             IList<SelectListItem> states = new List<SelectListItem>
@@ -551,7 +894,6 @@ namespace WIS.Controllers
             }
             return RedirectToAction("AddnewInvoice", "Invoice");
         }
-
         public ActionResult GetItemInventoryList(int CategoryId)
         {
             var service = new WISService();
@@ -567,12 +909,53 @@ namespace WIS.Controllers
             var model = service.GetInventoryDataById(Id);
             return Json(model, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult UpdateInvoiceStatus(int Id, string InvStatus)
         {
             var service = new WISService();
-            var model = service.UpdateInvoiceStatus(Id, InvStatus);            
+            var model = service.UpdateInvoiceStatus(Id, InvStatus);
+            if (model.InvoiceStatus == "Completed")
+            {
+               UpdateInvONCompletedStatus(model);
+            }
             return RedirectToAction("Invoices", "Invoice");
         }
+        private InvoiceResult UpdateInvONCompletedStatus(InvoiceModel model)
+        {
+            var service = new WISService();           
+            var res = service.SaveInvDtls(model);
+            return res;
+        }
+        public ActionResult ConvertEsttoInv(int EstimateID)
+        {
+            var service = new WISService();
+            var res = service.UpdateEstimateStatus(EstimateID);           
+            var estde = service.ConvEsttoInv(EstimateID);   
+            return RedirectToAction("Invoices", "Invoice");
+        }
+        public void ArchiveMonthInvoices(int[] ArchInvoices)
+        {
+            var service = new WISService();
+            var model = new InvoiceModel();
+            foreach (var item in ArchInvoices)
+            {
+                DateTime dateTime = DateTime.UtcNow.Date;               
+                var InvLst = service.GetInvoiceDetails(item);                
+                if (InvLst.InvoiceDate.Month < dateTime.Month && InvLst.InvoiceDate.Month!=dateTime.Month) { 
+                    var res = service.BulkUpdateInvoiceStatus(item);
+                }
+                else
+                {
+
+                }
+            }           
+        }
+        public ActionResult ArchivedInvoices()
+        {
+            var service = new WISService();
+            List<InvoiceModel> Iim = new List<InvoiceModel>();
+            var model = service.GetArchivedInvoiceList();
+            return View(model);
+        }
+       
     }
 }

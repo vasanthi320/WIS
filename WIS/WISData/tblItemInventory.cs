@@ -18,6 +18,7 @@ namespace WISData
         public tblItemInventory()
         {
             this.tblInvoiceDetails = new HashSet<tblInvoiceDetail>();
+            this.tblEstimateDetails = new HashSet<tblEstimateDetail>();
         }
     
         public int ItemInventoryID { get; set; }
@@ -40,5 +41,7 @@ namespace WISData
         public virtual tblLocation tblLocation { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tblInvoiceDetail> tblInvoiceDetails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<tblEstimateDetail> tblEstimateDetails { get; set; }
     }
 }
