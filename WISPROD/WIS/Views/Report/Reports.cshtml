@@ -1,0 +1,278 @@
+﻿@model IEnumerable<WISModels.InvoiceModel>
+
+<style>
+    a.underline, .btn btn-link {
+        text-decoration: underline;
+    }
+
+    .boxed {
+        border: 1px solid black;
+        /*padding-right:15px;*/
+    }
+
+    .list-group {
+        padding-left: 3px;
+        margin-bottom: 20px;
+    }
+
+    ul li:nth-child(n+7) {
+        display: none;
+    }
+    /*ul li {
+        border: 1px solid #aaa;
+    }*/
+
+    span {
+        cursor: pointer;
+        /*color: #f00;*/
+    }
+
+    #panelbody1 {
+        padding: 1px;
+    }
+
+    ul {
+        list-style-type: none;
+    }
+</style>
+<br /><br />
+
+<div class="col-md-12 row pull-left">
+    <div class="col-md-4">
+        <div class="panel panel-primary">
+            <div class="panel-heading">Recent Activity</div>
+            <div class="panel-body" id="panelbody1">
+                <ul class="list-group" id="lstgroup">
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            //int days = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+                            <li class="list-group-item"><a class="underline" target="_blank" href=" @Url.Action("GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID })">Invoice</a> #@item.InvoiceID - $@item.InvoiceTotal &nbsp;</li>
+                        }
+                    }
+                </ul>
+                <button type="button" id="showmore" class="btn btn-link" data-toggle="collapse" data-target="#demo">Show more</button>
+                <button type="button" id="showless" class="btn btn-link" data-toggle="collapse" data-target="#demo" style="display:none">Show less</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading"> Invoices & Expenses</div>
+            <div class="panel-body">
+                @if (Model != null)
+                {
+                    <div id="Summarydiv" class="tab-pane fade active in">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="x_panel">
+                                    <div class="x_title">
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content">
+                                        <div id="echart_bar_horizontal" style="height:380px;"></div>
+                                        <div id="Nodata" class="hidden">
+                                            No Data Found
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <h4>No Data</h4>
+                }
+            </div>
+        </div>
+    </div>
+    @*<div class="col-md-5">
+            @Html.Action("GetInvoiceMonthSummary", "Report")
+        </div>*@
+
+</div>
+
+<div class="pull-left ">
+    @Html.Action("GlCodesData", "Report")
+</div>
+
+
+@section scripts {
+    @*<script src="~/Scripts/echarts-all.js"></script>*@
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/echarts.min.js"></script>
+    <script src="~/Scripts/infographic.js"></script>
+
+    <script language="javascript" type="text/javascript">
+
+        $(function () {
+            $('#showmore').click(function () {
+                var lgth = $('#lstgroup li:hidden').length;
+                $('#lstgroup li:hidden').slice(0, lgth).show();
+                if ($('#lstgroup li').length == $('#lstgroup li:visible').length) {
+                    $('#showmore').hide();
+                    $('#showless').show();
+                    //$('list-item').css('display', 'none');
+                    //$("list-item").removeAttr("display");
+                    $("#lstgroup").removeAttr("style");
+                }
+            });
+        });
+
+        $(function () {
+            $('#showless').click(function () {
+                var lgth = $('#lstgroup li:visible').length;
+                $('#lstgroup li:visible').slice(5, lgth).hide();
+                //if ($('#lstgroup li').length == $('#lstgroup li:visible').length) {
+                if ($('#lstgroup li:visible').length <= 5) {
+                    $('#showless').hide();
+                    $('#showmore').show();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            loadGraps();
+        });
+        //loadGraps();
+        function loadGraps() {
+            var urlSummary = "/Report/GetDashboardData/";
+            $.ajax({
+                url: urlSummary,
+                dataType: "json",
+                type: "Get",
+                cache: false,
+            })
+                .done(function (result) {
+                    loadSummary(result);
+                    $('#echart_bar_horizontal').show();
+                    $("#Nodata").addClass("hidden");
+                })
+                .fail(function (jqXHR, textStatus, error) {
+                    console.log("error" + textStatus);
+                });
+        }
+        function loadInvoiceSummary() {
+            var urlSummary = "/Report/GetInvoiceMonthSummary/";
+            $.ajax({
+                url: urlSummary,
+                type: "Get",
+                cache: false,
+            })
+                .done(function (result) {
+
+                })
+                .fail(function (jqXHR, textStatus, error) {
+                    console.log("error" + textStatus);
+                });
+        }
+        //function loadGLSummary() {
+        //    var urlSummary = "/Report/GetInvoiceMonthSummary/";
+        //    $.ajax({
+        //        url: urlSummary,
+        //        type: "Get",
+        //        cache: false,
+        //    })
+        //        .done(function (result) {
+
+        //        })
+        //        .fail(function (jqXHR, textStatus, error) {
+        //            console.log("error" + textStatus);
+        //        });
+        //}
+        // var names = [];
+        function getHeader(result) {
+            var s = [];
+            result.forEach(function (element) {
+                console.log(element.MonthName);
+                s.push(element.MonthName +element.Year);
+                // names.push(element.Name)
+            });
+            return s;
+        }
+        function loadSummary(result) {
+            var myChart = echarts.init(document.getElementById('echart_bar_horizontal'), theme);
+            //let seriesHeader = result.map(item => item.MonthName);
+            let seriesHeader = getHeader(result);
+            let datas = [];
+            Object.keys(result[0]).forEach(function (key) {
+                if (key == 'Drafted' || key == 'Completed') {
+                    datas.push({
+                        name: key,
+                        type: 'bar',
+                        //data: result.map(item => item[key])
+                        data: result.map(function (el) { return el[key]; })
+                    })
+                }
+            })
+            option = {
+                xAxis: {
+                    type: 'category',
+                    //maxWidth: 50,
+                    barPercentage: 1.0,
+                    data: seriesHeader
+                },
+                yAxis: {
+                    type: 'value',
+
+                },
+                legend: {
+                    data: result,
+                    maxWidth: 50,
+                },
+                series: datas,
+
+                tooltip: {
+                    trigger: 'item'
+                    //formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+
+            };
+
+            myChart.setOption(option, true);
+
+            myChart.on('click', function (params) {
+                console.log(params)
+                option.series[0].data.forEach((data, index) => {
+                    if (index == params.dataIndex) {
+                        var monthname = params.dataIndex;
+                        var total = params.data;
+                        var name = params.name;
+                        data.isChecked = true;
+                       // var urlSummary = "/Report/GetBaiduGraphData/";
+                        window.location = '@Url.Action("GetBaiduGraphData", "Report")' + '?InvoiceCompTotl=' + total +'&Name='+name;
+                    //    $.ajax({
+                    //        url: urlSummary,
+                    //        //dataType: "html",
+                    //        type: "post",
+                    //        cache: false,
+                    //        data: { InvoiceCompTotl: total, Name: name },
+                    //        dataType: "json",
+                    //        "dataSrc": function (json) {
+                    //            jsonObj = $.parseJSON(json.data)
+                    //            return jsonObj.data;
+                    //        } ,
+                    //        success: function (result) {
+                    //            var objdata = $.parseJSON(result.d);
+                    //            fnCallback(objdata);
+                    //            $("#Baiduinvoice_id").show();
+                    //            // now iterate through this object's
+                    //      //      $(json).each(function (i, val) {
+                    //      //          $.each(val, function (k, v) {
+                    //      //              console.log(k + " : " + v);
+                    //      //          }
+                    //      //});
+                    //        },
+                    //        error: function (result) {
+                    //    alert(result.responseText);
+                    //}
+                    //    });
+                    }
+                });
+            })
+        }
+    </script>
+}

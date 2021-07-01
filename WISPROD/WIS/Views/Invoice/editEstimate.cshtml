@@ -1,0 +1,590 @@
+﻿@model WISModels.EstimateModel
+@{
+    ViewBag.Title = "EditEstimateItem";
+}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/rowreorder/1.2.7/css/rowReorder.dataTables.min.css" rel="stylesheet" />
+<style>
+    .modal-header {
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #0480be;
+    }
+</style>
+<h2>Edit Estimate</h2>
+<hr />
+@using (Html.BeginForm("SaveEditEstimateDetails", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails" }))
+{
+    @Html.HiddenFor(p => p.Estimate)
+    @Html.HiddenFor(p => p.Project)
+    @Html.HiddenFor(p => p.Status)
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+    <div class="row col-md-6">
+
+        <div class="form-group">
+            <label class="control-label col-xs-3 ">Client</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(model => model.ClientTypeID, ViewBag.client as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control", @onchange = "javascript:GetClient();" })
+                @Html.ValidationMessageFor(model => model.ClientTypeID, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group" id="employediv" style="display:none">
+            <label class="control-label col-xs-3 ">Employee</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(model => model.employID, ViewBag.Employee as IEnumerable<SelectListItem>, new { Class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Employee, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group" id="Locationdiv">
+            <label class="control-label col-xs-3 ">Stock Location</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(model => model.LocationID, ViewBag.Location as IEnumerable<SelectListItem>, new { Class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group" id="Projectdiv">
+            <label class="control-label col-xs-3 ">Project</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(model => model.InvoiceJobNumber, ViewBag.Job as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control" })
+                @Html.ValidationMessageFor(model => model.InvoiceJobNumber, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group" id="Contactdiv">
+            <label class="control-label col-xs-3 ">Contact</label>
+            <div class="col-sm-7">
+                @Html.TextBoxFor(model => model.Contact, new { Class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Contact, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group" style="display:none" id="extclientdiv">
+            <label class="control-label col-xs-3 ">External Client</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(model => model.ExternalClientID, ViewBag.ExternalClient as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control" })
+                @Html.ValidationMessageFor(model => model.ExternalClientID, "", new { @class = "text-danger" })
+                <a class="btn-link col-sm-3" id="extclientId" href="#" onclick="javascript:Addexternalclient()">AddNewClient</a>
+            </div>
+        </div>
+    </div>
+    <div class="row col-md-6">
+        <div class="form-group">
+            <label class="control-label col-xs-4 ">Estimate Number</label>
+            <div class="col-sm-8">
+                @Html.TextBoxFor(model => model.EstimateNumber, new { @class = "form-control", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.EstimateNumber, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-4 ">Estimate Date</label>
+            <div class="col-sm-8">
+                @Html.EditorFor(model => model.EstimateDate, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.EstimateDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-4 ">Vendor#</label>
+            <div class="col-sm-8">
+                @Html.TextBoxFor(model => model.Vendor, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Vendor, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-xs-4 ">EstimateVendor#</label>
+            <div class="col-sm-8">
+                @Html.TextBoxFor(model => model.EstimateVendor, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.EstimateVendor, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div id="dvDetails">
+        @Html.Partial("_estimateDetails", Model.EstimateDetails)
+    </div>
+    <div class="row pull-left">
+        <button id="AddButtonId" type="button" class="btn btn-success" onclick="javascript:editAddProdItem()">Add Line&nbsp;<span class="glyphicon glyphicon-plus"></span></button>&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+
+    <br /> <br /> <br />
+    <br /> <br /> <br />
+    <div class="col-md-12 form-inline" style="text-align:center">
+        <div class="form-group">
+            <label for="date" class="control-label col-xs-2 ">Terms</label>
+            <div class="col-sm-6">
+                @Html.TextAreaFor(p => p.defaultdetails.SingleOrDefault().DefaultValue, new { @class = "form-control", @readonly = true, rows = 5, columns = 25 })
+                @Html.ValidationMessageFor(p => p.DefaultValue, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="date" class="control-label col-xs-2 ">Notes</label>
+            <div class="col-sm-6">
+                @Html.TextAreaFor(p => p.EstimateNotes, new { @class = "form-control", rows = 5, columns = 25 })
+                @Html.ValidationMessageFor(p => p.EstimateNotes, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <br /> <br /> <br />
+    <br /> <br /> <br /> <br /> <br /> <br />
+    <br /> <br /> <br /> <br /> <br /> <br />
+    <div>
+        <button class="btn btn-primary" id="btnSave" value="Draft" type="submit" onclick="javascript:SubmitInvoice('D')">Save as Draft</button>
+        <button class="btn btn-primary" id="btnSave" value="Me" type="submit" onclick="javascript:SubmitInvoice('ME')">Send to me</button>
+    </div>
+}
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog vertical-align-center">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#004990">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Add  Item</h4>
+            </div>
+            <div id="divbody" class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts{
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.7/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+
+
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.auto-complete.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.ui.autocomplete.scroll.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var table = $('#itemtbl').DataTable({
+                responsive: true,
+                paging: false,
+                autoWidth: false,
+                rowReorder: true,
+                destroy: true,
+                "ordering": false,
+                "bInfo": false,
+                searching: false,
+                "columnDefs": [
+                    { "width": "15px", "targets": 0/*, "visible": false*/ },
+                    { "width": "15px", "targets": 1 },
+                    { "width": "35px", "targets": 2 },
+                    { "width": "40px", "targets": 3 },
+                    { "width": "10px", "targets": 4 },
+                    { "width": "35px", "targets": 5 },
+                    { "width": "35px", "targets": 6 },
+                    { "width": "15px", "targets": 7 },
+                    { "width": "20px", "targets": 8 },
+                    { "width": "20px", "targets": 9 },
+                    { className: 'text-center', targets: [0, 1, 2, 3, 4, 5, 6, 7, 8,9] },
+                ],
+            });
+            $('#itemtbl').on('row-reorder.dt', function (dragEvent, data, nodes) {
+                for (var i = 0, ien = data.length; i < ien; i++) {
+                    var rowData = table.row(data[i].node).data();
+                    $.ajax({
+                        type: "GET",
+                        cache: false,
+                        contentType: "application/json; charset=utf-8",
+                        url: '/Invoice/UpdateRowInfo',
+                        data: { Id: rowData[0], fromPosition: data[i].newPosition, toPosition: data[i].oldPosition },
+                        contentType: "application/json",
+                        success: function (result) {
+                            setInterval('refreshPage()', 4000);
+                        },
+                        error: function (xhr) {
+                            console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                        }
+                    });
+                }
+            });
+        });
+        function refreshPage() {
+            location.reload(true);
+        }
+        $(document).ready(function () {
+              var result = '@ViewBag.Result';
+            if (result != "") {
+                alert(result + " is Out of Stock");
+                result = "";
+            }
+            $('.Datepicker').datepicker("setDate", new Date());
+
+            $('.Datepicker').datepicker();
+            GetClient();
+            $("#InvoiceJobNumber").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Invoice/GetProjects",
+                        type: "POST",
+                        dataType: "json",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.JobDescription, value: item.JobDescription };
+                            }))
+                        }
+                    })
+                },
+                minLength: 3,
+                maxShowItems: 8,
+                select: function (event, ui) {
+                }
+            });
+        });
+
+                function hide() {
+                    var NonInv = $('#NonInventoryItem').val();
+                    var ItmDes = $('#EstimateDescription').val();
+                    if (ItmDes == '') {
+                        $("#dropdowndiv").hide();
+                        $("#textboxdiv").show();
+                    }
+                    else if (NonInv == '') {
+                        $("#dropdowndiv").show();
+                        $("#textboxdiv").hide();
+                    }
+                }
+
+        function GetClient() {
+            var cl = $('#ClientTypeID').val();
+            if (cl == 1) {
+                $("#employediv").show();
+                $("#Projectdiv").hide();
+                $("#extclientdiv").hide();
+            } else if (cl == 2) {
+                $("#employediv").hide();
+                $("#Projectdiv").show();
+                $("#extclientdiv").hide();
+            } else if (cl == 3) {
+                $("#employediv").hide();
+                $("#Projectdiv").hide();
+                $("#extclientdiv").show();
+            }
+        }
+
+         function AddProdItem() {
+            var loc = $("#LocationID").val();
+            var loadurl = '@Url.Action("PopupAddEstimateItem", "Invoice")'+"?Location="+loc;
+            $("#divbody").html("Content loading please wait...");
+            $("#myModalLabel").html("Add Estimate Details");
+
+            $.ajax(loadurl, {
+                cache: false,
+                data: { Location: loc },
+                success: function (data, textStatus, jqXHR) {
+                    $("#divbody").html(data);
+                    $("#myModal").modal("show");
+                    $("#EstimateDescription").autocomplete({
+                source: function (request, response) {
+                    debugger;
+                    $.ajax({
+                        url: "/Invoice/GetCategories",
+                        type: "POST",
+                        dataType: "json",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.ItemCategoryDescription, value: item.ItemCategoryDescription };
+                            }))
+                        }
+                    })
+                },
+                appendTo: "#frmDetails",
+                minLength: 3,
+                maxShowItems: 8,
+                focus: function (event, ui) {
+                    event.preventDefault();
+                    $(this).val(ui.item.label);
+                },
+                select: function (event, ui) {
+                    event.preventDefault();
+                    $("#ItemInventoryDescription").val(ui.item.ItemCategoryDescription);
+                }
+            });
+                },
+                dataType: "html"
+            });
+                }
+
+             function editAddProdItem() {
+                 var loc = $("#LocationID").val();
+                 var EstimateID = $("#Estimate").val()
+         var loadurl = '@Url.Action("EditPopupAddEstimateItem", "Invoice")'+"?Location="+loc;
+            $("#divbody").html("Content loading please wait...");
+            $("#myModalLabel").html("Add Invoice Details");
+
+            $.ajax(loadurl, {
+                cache: false,
+                success: function (data, textStatus, jqXHR) {
+                    $("#divbody").html(data);
+                    $("#myModal").modal("show");
+                },
+                dataType: "html"
+            });
+        }
+        var Maxqty = 0;
+        var Id = 0;
+        function GetInvoiceDetails(edit = "") {
+            var itm = $('#ItemInventoryID option:selected').val();
+            var lst = itm.split("|");
+            Id = lst[0];
+            Maxqty = parseInt(lst[2]);
+            if (edit == "") {
+                $('#InvoiceDetailQuantity').val("");
+                $("#InvoiceDetailLineItemTotal").val("");
+                $("#ItemInventoryDescription").val($('#ItemInventoryID option:selected').text());
+                $("#ItemInventoryUnitCost").val(((Math.round(lst[1] * 100) / 100).toFixed(2)));
+            }
+        }
+
+        function PopulateItmTotal() {
+            var item = $('#ItemInventoryCost').val();
+            Maxqty = parseInt($('#EstimateDetailQuantity').val());
+            var qnty = parseInt($('#EstimateQuantity').val());
+            if (qnty > Maxqty) {
+                alert("Available stock is :" + Maxqty);
+                $('#EstimateQuantity').val(Maxqty);
+                $("#EstimateDetailLineItemTotal").val(item * Maxqty);
+            } else {
+                $("#EstimateDetailLineItemTotal").val(item * qnty);
+            }
+        }
+
+         function EditSaveItem() {
+             var loadurl = '@Url.Action("SaveEditEstimatedtls", "Invoice")';
+             var data = $("#frmEditDetails").serialize();            
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: data,
+                success: function (data, textStatus, jqXHR) {
+                    $("#dvDetails").html(data);
+                    $("#NonInventoryItem").html(data.NonInventoryItem);
+                    $("#myModal").modal("hide");
+                }
+            });
+         }
+
+        function SaveItem() {
+            var price = $('#ItemInventoryUnitCost').val();
+            var qnty = parseInt($('#InvoiceQuantity').val());
+            var Code = $('#InvoiceDetailCostCodeGL').val();
+            var InvoiceCode = $('#InvoiceDetailCostCodeNonLabor').val();
+            var descp = $('#ItemInventoryID option:selected').text();
+            var categ = $("#ItemCategoryID option:selected").val();
+            var catTxt = $("#ItemCategoryID option:selected").text();
+            var loca = $("#LocationID").val();
+            var loadurl = '@Url.Action("AddInvoiceItems", "Invoice")';
+
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: { Id: Id, qty: qnty, price: price, CGCode: Code, InvCode:InvoiceCode, desc: descp, cat: categ, catText: catTxt,locaton:loca},
+                success: function (data, textStatus, jqXHR) {
+                    $("#dvDetails").html(data);
+                    $("#myModal").modal("hide");
+                }
+            });
+        }
+         function SaveItemforedit() {
+            var price = $('#ItemInventoryCost').val();
+            var qnty = parseInt($('#EstimateQuantity').val());
+             var Code = $('#EstimateDetailCostCodeGL').val();
+             var InvoiceCode = $('#EstimateDetailCostCodeNonLabor').val();
+            var descp = $('#ItemInventoryID option:selected').text();
+            var categ = $("#ItemCategoryID option:selected").val();
+            var catTxt = $("#ItemCategoryID option:selected").text();
+            var loadurl = '@Url.Action("EditAddEstimateItems", "Invoice")';
+             var loca = $("#LocationID").val();
+             var EstimateID = $("#Estimate").val()
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: { Id: Id, qty: qnty, price: price, CGCode: Code, InvCode: InvoiceCode, desc: descp, cat: categ, catText: catTxt, locaton: loca, EstimateId:EstimateID},
+                success: function (data, textStatus, jqXHR) {
+                    $("#dvDetails").html(data);
+                    $("#myModal").modal("hide");
+                }
+
+            });
+        }
+        function SaveItemforedit1() {
+            var EstimateID = $("#Estimate").val()
+            var price = $('#ItemInventoryCost').val();
+            var qnty = parseInt($('#EstimateQuantity').val());
+            var Code = $('#EstimateDetailCostCodeGL').val();
+            var InvoiceCode = $('#EstimateDetailCostCodeNonLabor').val();
+            var it1 = $('#NonInventoryItem').val();
+            var loadurl = '@Url.Action("EditAddEstimateItems1", "Invoice")';
+
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: { Id: Id, qty: qnty, price: price, CGCode: Code, InvCode: InvoiceCode, itm1: it1, EstimateId: EstimateID},
+                success: function (data, textStatus, jqXHR) {
+                    $("#dvDetails").html(data);
+                    $("#myModal").modal("hide");
+                }
+
+            });
+        }
+ function EditSaveEstItem() {
+             var loadurl = '@Url.Action("SaveEditEstimatedtls", "Invoice")';
+             var data = $("#frmEditDetails").serialize();
+
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: data,
+                success: function (result, textStatus, jqXHR) {
+                    $("#dvDetails").html(result);
+                    $("#myModal").modal("hide");
+                }
+            });
+         }
+        function EditEstimateDtl(EstimateDetailID) {
+            $('#EstimateDetailQuantity').val("");
+            $("#EstimateDetailLineItemTotal").val("");
+            var loadurl = '@Url.Action("EditEstimateDetailItem", "Invoice")' + "?EstimateDetailID=" + EstimateDetailID;
+            $("#divbody").html("Content loading please wait...");
+            $("#myModalLabel").html("Edit Estimate Details");
+            $("#divbody").load(loadurl, function () {
+                hide();
+                $("#myModal").modal("show");
+            });
+        }
+
+          function Addexternalclient() {
+             var loadurl = '@Url.Action("ExternalClientInfo", "Invoice")';
+            $("#divbody").html("Content loading please wait...");
+            $("#myModalLabel").html("New Client");
+
+            $.ajax(loadurl, {
+                cache: false,
+                success: function (data, textStatus, jqXHR) {
+                    $("#divbody").html(data);
+                    $("#myModal").modal("show");
+                },
+                dataType: "html"
+            });
+          }
+
+                function DeleteEstimateDtl(EstimateDetailID) {
+                    var EstimateID = $("#Estimate").val()
+            var conf = confirm("Are you sure you want to delete this item ?");
+            if (conf > 0) {
+                var loadurl = '@Url.Action("DeleteEstimateDetailItemforEdit", "Invoice")';
+                $.ajax({
+                    type: "Post",
+                    url: loadurl,
+                    data: { estimate: EstimateID, EstimateDetailID: EstimateDetailID },
+                    success: function (result) {
+                        $("#dvDetails").html(result);
+                        $("#myModal").modal("hide");
+                    }, error: function (result) {
+                        //alert(result.responseText);
+                    }
+                });
+            }
+        }
+        function GetItemInventoryList() {
+            var catId = $('#ItemCategoryID').val();
+            var dropdownId = $('#ItemInventoryID');
+            $.ajax({
+                type: "GET",
+                url: '/Invoice/GetItemInventoryList',
+                data: { CategoryId: catId },
+                contentType: "application/json",
+                dataType: "json",
+                success: function (result) {
+                    $(dropdownId).html('');
+                    if (result) {
+                        $(dropdownId).append("<option value = '' >--Select--</option >");
+                        $.each(result, function (index, rs) {
+                            $(dropdownId).append("<option value='" + rs.Value + "'>" + rs.Text + "</option>");
+                        });
+                    }
+                }
+            });
+        }
+
+        //function SubmitInvoice(type) {
+        //    $("#InvoiceStatus").val(type);
+        //}
+        function SubmitInvoice(type) {
+
+             var url = '@Url.Action("UpdateInvoiceStatus", "Invoice")';
+            $("#Status").val(type);
+                $.ajax({
+                    type: "Post",
+                    url: url,
+                    data: JSON.stringify({ Id: @Model.Estimate, InvStatus: type }),
+                    contentType: "application/json",
+                    success: function (result) {
+                        location.href = '@Url.Action("Estimates", "Invoice")'
+                    },
+                    error: function (xhr) {
+                        console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                    }
+                });
+        }
+        function InventoryDtls() {
+            var itm = $('#Inventory option:selected').val();
+            if (itm == 2) {
+                $("#inventorydiv").show();
+                $("#itmdiv").hide();
+                $("#Categorydiv").hide();
+                $("#footer1").show();
+                $("#footer").hide();
+            }
+            else if (itm == 1) {
+                $("#inventorydiv").hide();
+                $("#itmdiv").show();
+                $("#Categorydiv").show();
+                $("#footer").show();
+                $("#footer1").hide();
+            }
+        }
+
+         function GetExisProdDetails() {
+            var itm = $('#ItemInventoryID option:selected').val();
+            var loadurl = '@Url.Action("GetProdDetails", "Invoice")';
+            var lst = itm.split("|");
+            Id = lst[0];
+            Maxqty = parseInt(lst[2]);
+            $.ajax(loadurl, {
+                type: "Get",
+                cache: false,
+                data: { id: itm},
+                success: function (data, textStatus, jqXHR) {
+                    $("#prePrice").val(data.ItemInventoryQuantity);
+                    $("#currentqty").html(data.ItemInventoryQuantity);
+                    $('#ItemInventoryCost').val(((Math.round(data.ItemInventorySalesPrice * 100) / 100).toFixed(2)));
+                    $('#EstimateDetailQuantity').val(data.ItemInventoryQuantity);
+                    $("#EstimateDetailLineItemTotal").val("");
+                    $("#EstimateDetailQuantity").val("");
+
+                }
+            });
+        }
+    </script>
+}

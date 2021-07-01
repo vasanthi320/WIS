@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="0759ceef8425450b961364f06c247c5f" Name="Diagram1">
+        <EntityTypeShape EntityType="WISModel.tblItemCategory" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WISModel.tblLocation" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WISModel.tblItemInventoryAudit" Width="3.375" PointX="10.5" PointY="3.125" />
+        <EntityTypeShape EntityType="WISModel.tblClientType" Width="1.5" PointX="0.75" PointY="3.75" />
+        <EntityTypeShape EntityType="WISModel.tblItemInventory" Width="2.5" PointX="2.875" PointY="5.125" />
+        <AssociationConnector Association="WISModel.FK_tblItemInventory_tblLocation" />
+        <EntityTypeShape EntityType="WISModel.tblExternalClient" Width="2.375" PointX="0.75" PointY="11.75" />
+        <EntityTypeShape EntityType="WISModel.tblInvoiceSummary" Width="2.125" PointX="9.375" PointY="8.75" />
+        <EntityTypeShape EntityType="WISModel.tblEmployee" Width="1.5" PointX="4.375" PointY="10.75" />
+        <EntityTypeShape EntityType="WISModel.tblInvoiceDetail" Width="1.875" PointX="8" PointY="3.25" />
+        <AssociationConnector Association="WISModel.FK_tblInvoiceDetail_tblItemInventory" />
+        <EntityTypeShape EntityType="WISModel.tblJob" Width="1.5" PointX="6.375" PointY="7.75" />
+        <EntityTypeShape EntityType="WISModel.tblEmployeeLocation" Width="1.5" PointX="8.375" PointY="0.75" />
+        <EntityTypeShape EntityType="WISModel.tblDefault" Width="1.5" PointX="10.375" PointY="0.75" />
+        <EntityTypeShape EntityType="WISModel.tblEstimate" Width="1.5" PointX="4.375" PointY="14" />
+        <EntityTypeShape EntityType="WISModel.tblInvoice" Width="1.5" PointX="8.375" PointY="12.125" />
+        <AssociationConnector Association="WISModel.FK_tblInvoiceDetail_tblInvoice" />
+        <EntityTypeShape EntityType="WISModel.tblEstimateDetail" Width="1.5" PointX="10.625" PointY="12.125" />
+        <AssociationConnector Association="WISModel.FK_tblEstimateDetail_tblEstimates" />
+        <AssociationConnector Association="WISModel.FK_tblEstimateDetail_tblItemInventory" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

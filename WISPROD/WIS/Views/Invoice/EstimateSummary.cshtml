@@ -1,0 +1,287 @@
+﻿@model WISModels.EstimateModel
+@{
+    ViewBag.Title = "Estimate Summary";
+}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+@*<link href="~/Content/plugins/data Tables/jquery.orderable.min.css" rel="stylesheet" />*@
+
+<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/rowreorder/1.2.7/css/rowReorder.dataTables.min.css" rel="stylesheet" />
+<br /><br /><br />
+<div class="row">
+    <div class="col-md-6" style="padding-left:20px">
+        <strong>
+            <span>
+                Hoar Construction Warehouse<br />
+                550 Belview Street<br />
+                Bessemer AL 35020
+            </span>
+        </strong>
+    </div>
+    <div class="col-md-6" style="padding-right:20px">
+        <img src="~/Content/img/HOAR_Logos_FINAL_Stacked Lockup_2 color.jpg" class="visible-lg  visible-md pull-right" style="width:20% ;height:20%" />
+    </div>
+</div>
+
+<div>
+    @using (Html.BeginForm("SubmitEstimate", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+    {
+        @Html.AntiForgeryToken()
+        if (Model != null)
+        {
+            var test = Math.Truncate(Math.Abs(@Model.Total.HasValue ? Model.Total.Value : 0)).ToString("####").Length;
+            var Status = Model.Status;
+            @Html.HiddenFor(p => p.Estimate)
+            if (Model.Estimate > 0)
+            {
+
+                var external = Model.ExternalClientID;
+                var job = Model.InvoiceJobNumber;
+                if ((job == "NULL" || job == null) && (external == null))
+                {
+                    <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
+                    <strong><span><label>@Model.Contact </label></span></strong>
+                }
+                else if ((external != null) && (job == "NULL" || job == null))
+                {
+                    <div id="External" class="col-md-6">
+                        <p>
+                            <strong><span><label>@ViewBag.EXternalClientName</label></span></strong><br />
+                            <strong><span><label>@ViewBag.Addres</label></span></strong><br />
+                            <strong><span><label>@ViewBag.city ,  @ViewBag.sts , @ViewBag.zp </label></span></strong><br />
+                            <strong><span><label>@Model.Contact </label></span></strong>
+                        </p>
+                    </div>
+                }
+                else if ((external == null) && (job != null || job != "NULL"))
+                {
+                    <div id="JobAddress" class="col-md-6">
+                        <p>
+                            <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                            <strong><span><label>@Model.Contact </label></span></strong>
+                        </p>
+                    </div>
+                }
+                if (job == "NULL" || job == null)
+                {
+                    <div class="row">
+                        <div>
+                            <b><span><strong>Estimate#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.Estimate</sapn></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong class="col-md-offset-6">Estimate Date  <span class="col-md-offset-1">@Model.EstimateDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong class="col-md-offset-6">Estimate Total <span class="col-md-offset-1">$@string.Format("{0:#,0.00}", @Model.Total)</span> </strong></span></b>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div>
+                            <b><span><strong>Estimate#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   @Model.Estimate</sapn></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Estimate Date  <span class="col-md-offset-1">@Model.EstimateDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Estimate Total <span class="col-md-offset-1">$@string.Format("{0:#,0.00}", @Model.Total)</span> </strong></span></b>
+                        </div>
+                    </div>
+                }
+            }
+            <br />
+            <div class="table-responsive">
+                <table id="table_id" class="table table-striped display">
+                    @{int SrNo = 0;}
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>seq</th>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Unit Cost</th>
+                            <th>CostCode/GLCode</th>
+                            <th>Est CostCode</th>
+                            <th>Quantity</th>
+                            <th>LineTotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                         {
+                            foreach (var item in Model.EstimateDetails)
+                            {
+                                var result = item.EstimateDescription == null;
+                                <tr>  
+                                    <td>@item.EstimateDetailID</td>
+                                    <td>@(SrNo += 1)</td>
+                                    <td>@item.ItemInventoryID</td>
+                                    @if (result == true)
+                                     {
+                                        <td>@item.NonInventoryItem</td>
+                                     }
+                                    else
+                                    {
+                                        <td>@item.EstimateDescription</td>
+                                    }
+                                    <td>$@string.Format("{0:#,0.00}", @item.ItemInventoryCost)</td>
+                                    <td>@item.EstimateDetailCostCodeGL</td>
+                                    <td style="text-align:center;">@item.EstimateDetailCostCodeNonLabor</td>
+                                    <td style="text-align:center; width:25px">@item.EstimateDetailQuantity</td>
+                                    <td style="text-align:center; width:25px">$@string.Format("{0:#,0.00}", @item.EstimateDetailLineItemTotal)</td>
+                                </tr>
+                            }
+                         }
+
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <div>
+                <table class="col-md-offset-9">
+                    @*<tr>
+                            <td style="text-align:right;padding-left:45px"><strong>Total</strong></td>
+                            <td style="text-align:right;padding-left:50px"><strong>$@string.Format("{0:#,0.00}", @Model.Total)</strong></td>
+                        </tr>
+                        @if (test == 6)
+                        {
+
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:58px">$</span><span style="text-align:right;padding-left:26px">0.00</span></strong></td>
+                            </tr>
+                        }
+                        else if (test == 5)
+                        {
+
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:53px">$</span><span style="text-align:right;padding-left:24px">0.00</span></strong></td>
+                            </tr>
+                        }
+                        else if (test == 4)
+                        {
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:52px">$</span><span style="text-align:right;padding-left:28px">0.00</span></strong></td>
+                            </tr>
+                        }
+                        else if (test == 3)
+                        {
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:60px">$</span><span style="text-align:right;padding-left:12px">0.00</span></strong></td>
+                            </tr>
+                        }
+                        else if (test == 2)
+                        {
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:68px">$</span><span style="text-align:right;padding-left:8px">0.00</span></strong></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td style="text-align:right;padding-left:45px"><strong> Amount Paid</strong></td>
+                                <td><strong><span style="padding-left:77px">$</span><span style="text-align:right;">0.00</span></strong></td>
+                            </tr>
+                        }*@
+                    <tr>
+                        <td style="text-align:right;padding-left:45px"><strong> Balance Due</strong></td>
+                        <td style="text-align:right;"><strong>$@string.Format("{0:#,0.00}", Model.Total)</strong></td>
+                    </tr>
+                </table>
+            </div>
+            <br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br />
+            <div span class="col-md-offset-1 col-sm-offset-1">
+                <div class="row">
+                    Terms: <strong>@Model.DefaultValue</strong>
+                </div>
+                <br /><br />
+                <div class="row">
+                    Notes:<strong>@Model.EstimateNotes</strong>
+                </div>
+            </div>
+        }
+    }
+</div>
+@section scripts{
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.7/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+    @*<script src="~/Scripts/dataTables.rowReorder.js"></script>*@
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            var table = $('#table_id').DataTable({
+                responsive: true,
+                paging: false,
+                autoWidth: false,
+                rowReorder: true,
+                //"order": [[0, "asc"]],
+                //rowReorder: {
+                //    selector: 'tr'
+                //},
+                destroy: true,
+                "ordering": false,
+                "bInfo": false,
+                searching: false,
+                "columnDefs": [
+                    { "width": "15px", "targets": 0/*, "visible": false*/ },
+                    { "width": "35px", "targets": 1 },
+                    { "width": "40px", "targets": 2 },
+                    { "width": "10px", "targets": 3 },
+                    { "width": "35px", "targets": 4 },
+                    { "width": "35px", "targets": 5 },
+                    { "width": "15px", "targets": 6 },
+                    { "width": "20px", "targets": 7 },
+                    { "width": "20px", "targets": 8 },
+                    
+                    { className: 'text-center', targets: [0, 1, 2, 3, 4, 5, 6, 7,8 ] },
+                    //{ targets: 0, visible: false },
+                ],
+
+            });          
+        
+          $('#table_id').on('row-reorder.dt', function (dragEvent, data, nodes) {
+            for (var i = 0, ien = data.length; i < ien; i++) {
+                var rowData = table.row(data[i].node).data();
+                $.ajax({
+                    type: "GET",
+                    cache: false,
+                    contentType: "application/json; charset=utf-8",
+                    url: '/Invoice/UpdateRowInfo',
+                    //data: { Id: rowData[0], fromPosition: data[i].newposition, toPosition: data[i].oldposition },
+                    data: { Id: rowData[0], fromPosition: data[i].newPosition, toPosition: data[i].oldPosition },                   
+                    contentType: "application/json",
+                        success: function (result) {
+                            setInterval('refreshPage()', 4000);                            
+                    },
+                    error: function (xhr) {
+                        console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                    }
+                });
+            }
+          });
+        });
+        function refreshPage() {
+            location.reload(true);
+        }
+    </script>
+}
+

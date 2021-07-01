@@ -1,0 +1,144 @@
+﻿@model WISModels.InvoiceModel
+@{
+    ViewBag.Title = "PickUp Ticket Summary";
+}
+<html>
+<head>
+    <base href="http://demos.telerik.com/kendo-ui/styling/checkboxes">
+    <style>
+        html {
+            font-size: 14px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+    <title></title>
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.default.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.default.mobile.min.css" />
+
+    <script src="//kendo.cdn.telerik.com/2016.3.1118/js/jquery.min.js"></script>
+    <script src="//kendo.cdn.telerik.com/2016.3.1118/js/kendo.all.min.js"></script>
+
+    <style>
+        .k-checkbox-label,
+        .k-radio-label {
+            border-style: solid;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="example">
+        <button type="button" class="export-pdf">Export</button>
+        <div class="demo-section k-content">
+            <h4>Choose Extra Equipment</h4>
+            <ul class="fieldlist">
+                <li>
+                    <input type="checkbox" id="eq1" class="k-checkbox" checked="checked">
+                    <label class="k-checkbox-label" for="eq1">Rear side airbags</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eq2" class="k-checkbox" checked="checked" disabled="disabled">
+                    <label class="k-checkbox-label" for="eq2">Leather trim</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eq3" class="k-checkbox">
+                    <label class="k-checkbox-label" for="eq3">Luggage compartment cover</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eq4" class="k-checkbox">
+                    <label class="k-checkbox-label" for="eq4">Heated front and rear seats</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eq5" class="k-checkbox">
+                    <label class="k-checkbox-label" for="eq5">Dual-zone air conditioning</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eq6" class="k-checkbox">
+                    <label class="k-checkbox-label" for="eq6">Rain sensor</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="eeeeq4" class="k-checkbox" disabled="disabled">
+                    <label class="k-checkbox-label" for="eeeeq4">Towbar preparation</label>
+                </li>
+            </ul>
+            <ul class="fieldlist">
+                <li>
+                    <input type="radio" name="engine" id="engine1" class="k-radio" checked="checked">
+                    <label class="k-radio-label" for="engine1">1.4 Petrol, 92kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine2" class="k-radio">
+                    <label class="k-radio-label" for="engine2">1.8 Petrol, 118kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine3" class="k-radio">
+                    <label class="k-radio-label" for="engine3">2.0 Petrol, 147kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine4" class="k-radio" disabled="disabled">
+                    <label class="k-radio-label" for="engine4">3.6 Petrol, 191kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine5" class="k-radio">
+                    <label class="k-radio-label" for="engine5">1.6 Diesel, 77kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine6" class="k-radio">
+                    <label class="k-radio-label" for="engine6">2.0 Diesel, 103kW</label>
+                </li>
+                <li>
+                    <input type="radio" name="engine" id="engine7" class="k-radio" disabled="disabled">
+                    <label class="k-radio-label" for="engine7">2.0 Diesel, 125kW</label>
+                </li>
+            </ul>
+        </div>
+        <style>
+            .fieldlist {
+                margin: 0 0 -1em;
+                padding: 0;
+            }
+
+                .fieldlist li {
+                    list-style: none;
+                    padding-bottom: 1em;
+                }
+        </style>
+    </div>
+
+    <script>
+      // Import DejaVu Sans font for embedding
+
+      // NOTE: Only required if the Kendo UI stylesheets are loaded
+      // from a different origin, e.g. cdn.kendostatic.com
+      kendo.pdf.defineFont({
+        "DejaVu Sans"             : "//kendo.cdn.telerik.com/2016.3.1118/styles/fonts/DejaVu/DejaVuSans.ttf",
+        "DejaVu Sans|Bold"        : "//kendo.cdn.telerik.com/2016.3.1118/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+        "DejaVu Sans|Bold|Italic" : "//kendo.cdn.telerik.com/2016.3.1118/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "DejaVu Sans|Italic"      : "//kendo.cdn.telerik.com/2016.3.1118/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf"
+      });
+
+      $(".export-pdf").click(function() {
+        // Convert the DOM element to a drawing using kendo.drawing.drawDOM
+        kendo.drawing.drawDOM($("#example"))
+          .then(function(group) {
+          // Render the result as a PDF file
+          return kendo.drawing.exportPDF(group, {
+            paperSize: "auto",
+            margin: { left: "1cm", top: "1cm", right: "1cm", bottom: "1cm" }
+          });
+        })
+          .done(function(data) {
+          // Save the PDF file
+          kendo.saveAs({
+            dataURI: data,
+            fileName: "HR-Dashboard.pdf",
+            proxyURL: "//demos.telerik.com/kendo-ui/service/export"
+          });
+        });
+      });
+    </script>
+
+</body>
+</html>
+

@@ -1,0 +1,378 @@
+﻿@model WISModels.EstimateModel
+@{
+    ViewBag.Title = "Print Summary";
+}
+<br />
+@*<link href="~/Content/kendo.common.min.css" rel="stylesheet" />*@
+<link href="~/Content/kendo.default.min.css" rel="stylesheet" />
+    <link href="~/Content/kendo.default.mobile.min.css" rel="stylesheet" />
+<link href="~/Content/kendo.mobile.common.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<style type="text/css" media="print">
+
+    .pdf-page {
+        position: relative;
+        margin: 0 auto;
+        padding: .4in .3in;
+        color: #333;
+        background-color: #fff;
+        box-shadow: 0 5px 10px 0 rgba(0,0,0,.3);
+        box-sizing: border-box;
+    }
+
+    .pdf-header {
+        padding-bottom: .2in;
+        margin-bottom: .3in;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .invoice-number {
+        padding-top: .1in;
+        float: right;
+    }
+
+    .pdf-footer {
+        position: absolute;
+        bottom: .25in;
+        left: .3in;
+        right: .3in;
+        padding-top: 0.05in;
+        border-top: 1px solid #e5e5e5;
+        font-size: 0.9em;
+        text-align: left;
+        color: #787878;
+    }
+
+    .addresses {
+        font-size: 12px;
+    }
+
+        .addresses:after {
+            display: block;
+            content: "";
+            clear: both;
+        }
+
+    .for {
+        float: left;
+    }
+
+    .from {
+        float: right;
+    }
+
+    .addresses p {
+        color: #787878;
+        padding: .05in 0;
+        border-top: 1px solid #e5e5e5;
+    }
+
+        .addresses p:first-of-type {
+            border-top: 0;
+        }
+
+    .pdf-body {
+        margin-top: .3in;
+    }
+
+    .company-logo {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #3aabf0;
+    }
+
+    .signature {
+        padding-top: .3in;
+    }
+
+    /* Dimensions other than px and em should be divided by 1.33 for the proper PDF output */
+    .size-a4 {
+        width: 6.2in;
+        height: 8.7in;
+    }
+
+    .size-a5 {
+        width: 8.5in;
+        height: 11in;
+    }
+
+    .size-letter {
+        width: 6.3in;
+        height: 8.2in;
+    }
+
+    .size-executive {
+        width: 5.4in;
+        height: 7.8in;
+        font-size: 12px;
+    }
+
+        .size-executive .pdf-header {
+            margin-bottom: .1in;
+        }
+
+    #pdfDiv {
+        padding-left: 15px;
+        width: 1300px;
+        height: 1000px;
+    }
+</style>
+
+<div class="box wide hidden-on-narrow">
+    <div class="box-col">
+        <a role="button" class="btn btn-primary k-button k-button-icontext k-grid-pdf" onclick="javascript:getPDF()" href="#"><span class="k-button k-button-icontext k-grid-pdf"></span>Export to PDF</a>
+    </div>
+</div>
+<div class="page- container hidden-on-narrow">
+    <div class="pdf-page" id="pdfDiv" style=" margin: 30px;">
+        <div class="inner-page">
+            <div class="pdf-header">
+            </div>
+            <div class="pdf-body">
+                <div class="row">
+                    <div class="col-md-6"style="padding-left:20px">
+                        <strong>
+                            <span>
+                                Hoar Construction Warehouse<br />
+                                550 Belview Street<br />
+                                Bessemer AL 35020
+                            </span>
+                        </strong>
+                    </div>
+                    <div class="col-md-6"style="padding-right:20px">
+                        <img src="~/Content/img/HOAR_Logos_FINAL_Stacked Lockup_2 color.jpg" class="visible-lg  visible-md pull-right" style="width:20% ;height:20%" />
+                        @*<img src="~/Content/img/HOAR_logo.png" class="visible-lg  visible-md pull-right" style="width:50% ;height:50%" />*@
+                    </div>
+                </div>
+                <br /><br /><br /> <br /><br /><br />
+                <div>
+                    @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (Model != null)
+                        {
+                            var test = Math.Truncate(Math.Abs(@Model.Total.HasValue ? Model.Total.Value : 0)).ToString("####").Length;
+                            var Status = Model.Status;
+
+                            @Html.HiddenFor(p => p.Estimate)
+                            if (Model.Estimate > 0)
+                            {
+                                var external = Model.ExternalClientID;
+                                var job = Model.InvoiceJobNumber;
+                                if ((job == "NULL" || job == null) && (external == null))
+                                {
+                                    <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
+                                    <strong><span><label>@Model.Contact </label></span></strong>
+                                }
+                                else if ((external != null) && (job == "NULL" || job == null))
+                                {
+                                    <div id="External" class="col-md-6">
+                                        <p>
+                                            <strong><span><label>@ViewBag.EXternalClientName</label></span></strong><br />
+                                            <strong><span><label>@ViewBag.Addres</label></span></strong><br />
+                                            <strong><span><label>@ViewBag.city ,  @ViewBag.sts , @ViewBag.zp </label></span></strong><br />
+                                            <strong><span><label>@Model.Contact </label></span></strong>
+                                        </p>
+                                    </div>
+                                }
+                                else if ((external == null) && (job != null || job != "NULL"))
+                                {
+                                    <div id="JobAddress" class="col-md-6">
+                                        <p>
+                                            <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                                            <strong><span><label>@Model.Contact </label></span></strong>
+                                        </p>
+                                    </div>
+                                }
+
+                                <div class="row" style="padding-left:30px">
+                                    <div>
+                                        <b><span class="invoice-number"> Estimate # </span> <span class="col-md-offset-1">&nbsp;&nbsp; &nbsp;@Model.Estimate </span></b>
+                                    </div>
+                                    <div>
+                                        <b><span><strong>Estimate Date</strong></span><span class="col-md-offset-1">@Model.EstimateDate.ToString("MM/dd/yyyy")</span></b>
+                                    </div>
+                                    <div>
+                                        <b><span><strong style="text-align:left">Balance Due</strong></span><span class="col-md-offset-1">    &nbsp;$@string.Format("{0:#,0.00}", @Model.Total)</span></b>
+                                    </div>
+                                </div>
+
+                            }
+                            <br /><br />
+                            <div class="table-responsive">
+                                <table id="table_id" class="table-striped table-bordered table-condensed col-md-12">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Description</th>
+                                            <th>Unit Cost</th>
+                                            <th>CostCode/GLCode</th>
+                                            <th>Inv CostCode</th>
+                                            <th>Quantity</th>
+                                            <th>LineTotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null)
+                                        {
+                                            foreach (var item in Model.EstimateDetails)
+                                            {
+                                                var result = item.EstimateDescription == null;
+                                                <tr>
+                                                    <td>@item.ItemInventoryID</td>
+                                                    @if (result == true)
+                                                    {
+                                                        <td>@item.NonInventoryItem</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td>@item.EstimateDescription</td>
+                                                    }
+                                                    <td style="text-align:center; width:25px">$@string.Format("{0:#,0.00}", @item.ItemInventoryCost)</td>
+                                                    <td style="text-align:center; width:25px">@item.EstimateDetailCostCodeGL</td>
+                                                    <td style="text-align:center; width:25px">@item.EstimateDetailCostCodeNonLabor</td>
+                                                    <td style="text-align:center; width:25px">@item.EstimateDetailQuantity</td>
+                                                    <td style="text-align:center; width:25px">$@string.Format("{0:#,0.00}", @item.EstimateDetailLineItemTotal)</td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <br/>
+                            <div>
+                                <table class="col-md-offset-9">
+
+                                    @*<tr>
+                                        <td style="text-align:right;"><strong>Total</strong></td>
+                                        <td style="text-align:right;padding-left:40px"><strong>$@string.Format("{0:#,0.00}", @Model.Total)</strong></td>
+                                    </tr>
+                                    @if (test == 6)
+                                    {
+
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:42px">$</span><span style="text-align:right;padding-left:40px">0.00</span></strong></td>
+                                        </tr>
+                                    }
+                                    else if (test == 5)
+                                    {
+
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:41px">$</span><span style="text-align:right;padding-left:29px">0.00</span></strong></td>
+                                        </tr>
+                                    }
+                                    else if (test == 4)
+                                    {
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:40px">$</span><span style="text-align:right;padding-left:15px">0.00</span></strong></td>
+                                        </tr>
+                                    }
+                                    else if (test == 3)
+                                    {
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:48px">$</span><span style="text-align:right;padding-left:15px">0.00</span></strong></td>
+                                        </tr>
+                                    }
+                                    else if (test == 2)
+                                    {
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:55px">$</span><span style="text-align:right;padding-left:8px">0.00</span></strong></td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td style="text-align:right;"><strong> Amount Paid</strong></td>
+                                            <td><strong><span style="padding-left:65px">$</span><span style="text-align:right;">0.00</span></strong></td>
+                                        </tr>
+                                    }*@
+                                    <tr>
+                                        <td style="text-align:right;"><strong> Balance Due</strong></td>
+                                        <td style="text-align:right;"><strong>$@string.Format("{0:#,0.00}", Model.Total)</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <br /><br /><br /><br /><br /><br /> 
+                            <div span class="col-sm-offset-1" style="padding-left:25px">
+                                <div class="row" >
+                                    Terms: <strong>@Model.DefaultValue</strong>
+                                </div>
+                                <br /><br />
+                                <div class="row">
+                                    Notes:<strong>@Model.EstimateNotes</strong>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/Scripts/kendo.all.min.js"></script>
+    <script src="~/Scripts/pako_deflate.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+
+
+    <script language="javascript" type="text/javascript">
+
+        //$(document).ready(function () {
+        //    $('#table_id').DataTable({
+        //        responsive: true,
+        //        paging: false,
+        //        autoWidth: false,
+        //        "bInfo": false,
+        //        searching: false,
+        //        "columnDefs": [
+        //            { "width": "25px", "targets": 0 },
+        //            { "width": "40px", "targets": 1 },
+        //            { "width": "10px", "targets": 2 },
+        //            { "width": "30px", "targets": 3 },
+        //            { "width": "30px", "targets": 4 },
+        //            { "width": "15px", "targets": 5 },
+        //            { "width": "20px", "targets": 6 },
+        //            { className: 'text-center', targets: [0,1, 2, 3, 4, 5,6] },
+        //        ],
+        //    });
+        //});
+
+    kendo.pdf.defineFont({
+        "DejaVu Sans": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans.ttf",
+        "DejaVu Sans|Bold": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+        "DejaVu Sans|Bold|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "DejaVu Sans|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "WebComponentsIcons": "https://kendo.cdn.telerik.com/2017.1.223/styles/fonts/glyphs/WebComponentsIcons.ttf"
+    });
+    var id = "Estimate" + "@Model.Estimate";
+    function getPDF() {
+        kendo.drawing
+            .drawDOM($('#pdfDiv'), {
+                paperSize: "a3", forcePageBreak: ".page-break", multiPage: true, landscape: false, Portrait: true,
+                margin: { left: "2cm", top: "2cm", right: "2cm", bottom: "2cm" }
+               // margin= {top: "2cm", bottom:"2cm", right: "2cm", left:"2cm"}
+            })
+            .then(function (group) {
+                kendo.drawing.pdf.saveAs(group, id);
+                // Render the result as a PNG image
+                kendo.drawing.exportImage.saveAs(group, id);
+            });
+    }
+
+    </script>
+}

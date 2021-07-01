@@ -1,0 +1,432 @@
+﻿@model WISModels.InvoiceModel
+@{
+    ViewBag.Title = "PickUp Ticket Summary";
+}
+<br /><br /><br />
+<link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.default.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.1118/styles/kendo.default.mobile.min.css" />
+           
+<style type="text/css" media="print">
+    html {
+        font-size: 14px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    #defaultPickup, defaultDelivery {
+        border-style: solid;
+        border-width: 0;
+        width: 10px;
+        height: 14px;
+    }
+
+    td {
+        word-break: break-all;
+    }
+
+    .pdf-page {
+        position: relative;
+        margin: 0 auto;
+        padding: .4in .3in;
+        color: #333;
+        background-color: #fff;
+        box-shadow: 0 5px 10px 0 rgba(0,0,0,.3);
+        box-sizing: border-box;
+    }
+
+    .pdf-header {
+        padding-bottom: .2in;
+        margin-bottom: .3in;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .invoice-number {
+        padding-top: .1in;
+        float: right;
+    }
+
+    .pdf-footer {
+        position: absolute;
+        bottom: .25in;
+        left: .3in;
+        right: .3in;
+        padding-top: 0.05in;
+        border-top: 1px solid #e5e5e5;
+        font-size: 0.9em;
+        text-align: left;
+        color: #787878;
+    }
+
+    .addresses {
+        font-size: 12px;
+    }
+
+        .addresses:after {
+            display: block;
+            content: "";
+            clear: both;
+        }
+
+    .for {
+        float: left;
+    }
+
+    .from {
+        float: right;
+    }
+
+    .addresses p {
+        color: #787878;
+        padding: .05in 0;
+        border-top: 1px solid #e5e5e5;
+    }
+
+        .addresses p:first-of-type {
+            border-top: 0;
+        }
+
+    .pdf-body {
+        margin-top: .3in;
+    }
+
+    .company-logo {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #3aabf0;
+    }
+
+    .signature {
+        padding-top: .3in;
+    }
+
+    /* Dimensions other than px and em should be divided by 1.33 for the proper PDF output */
+    .size-a4 {
+        width: 6.2in;
+        height: 8.7in;
+    }
+
+    .size-a5 {
+        width: 8.5in;
+        height: 11in;
+    }
+
+    .size-letter {
+        width: 6.3in;
+        height: 8.2in;
+    }
+
+    .size-executive {
+        width: 5.4in;
+        height: 7.8in;
+        font-size: 12px;
+    }
+
+        .size-executive .pdf-header {
+            margin-bottom: .1in;
+        }
+
+    #pdfDiv {
+        width: 1300px;
+        height: 1000px;
+    }
+
+    #table_id {
+        table-layout: auto/fixed;
+    }
+</style>
+<div class="box wide hidden-on-narrow">
+    <div class="box-col">
+        @*<a role="button" class="btn btn-primary k-button k-button-icontext k-grid-pdf" onclick="javascript:getPDF()" href="#"><span class="k-button k-button-icontext k-grid-pdf"></span>Export to PDF</a>*@
+        <button class="export-pdf k-button" onclick="getPDF('.pdf-page')">Export to PDF</button>
+    </div>
+</div>
+<div class="page-container hidden-on-narrow">
+    <div class="pdf-page" id="pdfDiv">
+        <div class="inner-page">
+            <div class="pdf-header">
+
+            </div>
+            <div class="pdf-body">
+                <div class="row">                   
+                    <div class="col-md-6" style="padding-left:20px">
+                        <strong>
+                            <span>
+                                Hoar Construction Warehouse<br />
+                                550 Belview Street<br />
+                                Bessemer AL 35020                              
+                            </span>
+                        </strong>
+                    </div>
+
+                    <div class="col-md-6" style="padding-right:20px">                       
+                        <img src="~/Content/img/HOAR_Logos_FINAL_Stacked Lockup_2 color.jpg" class="visible-lg  visible-md pull-right" style="width:20% ;height:20%" />
+                    </div>
+                </div>
+                <br /> <br />
+                       <div>
+                           @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+                           {
+                               @Html.AntiForgeryToken()
+                               if (Model != null)
+                               {
+                                   //var result = Model.InvoiceDetails.SingleOrDefault().ItemInventoryDescription == null;
+                                   var Status = Model.InvoiceStatus;
+                                   @Html.HiddenFor(p => p.InvoiceID)
+                                   if (Model.InvoiceID > 0)
+                                   {
+                                       var job = Model.InvoiceJobNumber;
+                                       var external = Model.ExternalClientID;
+                                       if ((job == "NULL" || job == null) && (external == null))
+                                       {
+                                           <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div><br />
+                                           <strong><span><label>@Model.Contact </label></span></strong>
+                                       }
+                                       else if ((external != null) && (job == "NULL" || job == null))
+                                       {
+                                           <div id="External" class="col-md-6">
+                                               <p>
+                                                   <strong><span><label>@ViewBag.EXternalClientName</label></span></strong><br />
+                                                   <strong><span><label>@ViewBag.Addres</label></span></strong><br />
+                                                   <strong><span><label>@ViewBag.city ,  @ViewBag.sts , @ViewBag.zp </label></span></strong><br />
+                                                   <strong><span><label>@Model.Contact </label></span></strong>
+                                               </p>
+                                           </div>
+                                       }
+                                       else if ((external == null) && (job != null || job != "NULL"))
+                                       {
+                                           <div id="JobAddress" class="col-md-6">
+                                               <p>
+                                                   <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                                                   <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                                                   <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                                                   <strong><span><label>@Model.Contact </label></span></strong>
+                                               </p>
+                                           </div>
+                                       }
+                                       else if ((external != null) && (job != null || job != "NULL"))
+                                       {
+                                           <div id="JobAddress" class="col-md-6">
+                                               <p>
+                                                   <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                                                   <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                                                   <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                                                   <strong><span><label>@Model.Contact </label></span></strong>
+                                               </p>
+                                           </div>
+                                       }
+                                       if (job == "NULL" || job == null)
+                                       {
+                                           <div class="row" style="padding-left:20px">
+                                               <div>
+                                                   <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
+                                               </div>
+                                               <div>
+                                                   <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                                               </div>
+
+                                           </div>
+                                       }
+                                       else
+                                       {
+                                           <div class="row" style="padding-left:20px">
+                                               <div>
+                                                   <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
+                                               </div>
+                                               <div>
+                                                   <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                                               </div>
+                                           </div>
+                                       }
+                                   }
+                                   <br /><br />
+                                   <div class="row" style="padding-left:20px">
+                                       <label class="col-md-offset-6">Shipment</label>
+                                       <div id="Ship" class="col-md-offset-7">
+                                           <div class="col-sm-8">
+                                               <ul class="fieldlist">
+                                                   @if (Model.Shipment == "pickup")
+                                                   {
+
+                                                       <li>
+                                                           <input type="radio" name="engine" id="engine1" class="k-radio" checked>
+                                                           <label class="k-radio-label" for="engine1">Pickup</label>
+                                                       </li>
+
+                                                   }
+                                                   else
+                                                   {
+                                                       <li>
+                                                           <input type="radio" name="engine" id="engine1" class="k-radio">
+                                                           <label class="k-radio-label" for="engine1">Pickup</label>
+                                                       </li>
+                                                   }
+                                                   @if (Model.Shipment == "delivery")
+                                                   {
+
+                                                       <li>
+                                                           <input type="radio" name="engine" id="engine2" class="k-radio" checked>
+                                                           <label class="k-radio-label" for="engine2">Delivery</label>
+                                                       </li>
+
+                                                   }
+                                                   else
+                                                   {
+                                                       <li>
+                                                           <input type="radio" name="engine" id="engine2" class="k-radio">
+                                                           <label class="k-radio-label" for="engine2">Delivery</label>
+                                                       </li>
+                                                   }
+
+                                                   @*<li>
+                                    <input type="radio" id="defaultPickup" name="Shipment">
+                                    <label>Pickup</label>
+                                </li>
+                                <li>
+                                <input type="radio" name="Shipment" id="defaultDelivery">
+                                <label>Delivery</label></li>*@
+                                               </ul>
+
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <br /><br /><br />
+                                   <div class="table-responsive">
+                                       <table id="table_id" class="table table-striped">
+                                           <thead>
+                                               <tr>
+                                                   <th></th>                                                 
+                                                   <th>Item</th>
+                                                   <th>Description</th>
+                                                   <th>Quantity</th>
+                                               </tr>
+                                           </thead>
+                                           <tbody>
+                                               @if (Model != null)
+                                               {
+                                                   foreach (var item in Model.InvoiceDetails)
+                                                   {
+                                                       var result = item.ItemInventoryDescription == null;
+                                               <tr> 
+                                                   <td>
+                                                       <input type="checkbox" id="check1" class="k-checkbox" @*checked="checked"*@>  
+                                                       <label class="k-checkbox-label" for="check1"></label>
+                                                   </td>
+                                                   <td>@item.ItemInventoryID</td>
+                                                   @if (result == true)
+                                                    {
+                                                   <td>@item.NonInventoryItem</td>
+                                                    }
+                                                    else
+                                                    {
+                                                   <td style=" word-break: break-all;">@item.ItemInventoryDescription</td>
+                                                    }
+                                                   <td>@item.InvoiceDetailQuantity</td>
+                                               </tr>
+                                                   }
+                                               }
+                                           </tbody>
+                                       </table>
+                                   </div>
+                                   <br />
+                                   <br /><br /><br /><br />
+                                   <div span class="col-md-offset-1 col-sm-offset-1" sd>
+                                       <div class="row">
+                                           Terms: <strong>@Model.DefaultValue</strong>
+                                       </div>
+                                       <br /><br />
+                                       <div class="row">
+                                           Notes:<strong>@Model.InvoiceNotes</strong>
+                                       </div>
+                                   </div>
+
+                                   <br /><br /><br />
+                                   <div span class="row" style="padding-left:20px">
+                                       <div class="col-md-offset-1"> Accepted by: <span class="col-md-offset-6"> Date:</span></div>
+                                   </div>
+                                   <br /><br /><br />
+                                   <div span class="row">
+                                       <div class="col-md-offset-1" style="padding-left:20px"> Delivered by: <span class="col-md-offset-6"> Date:</span></div>
+                                   </div><br />
+                                   <span class="col-md-offset-1">
+                                       ***By signing and accepting the Delivery / Pickup Ticket, you are confirming that any
+                                       and all items delivered or returned are free of any safety defects or damages and
+                                       that the job team accepts any and all responsibility of the orders and equipment being delivered or returned***
+                                   </span>
+                                   <br /><span class="col-md-offset-1">
+                                       &nbsp; &nbsp;&nbsp;&nbsp;
+                                   </span>
+                               }
+                           }
+                       </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+   
+    <script src="~/Scripts/jquery-1.12.4.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/icheck.min.js"></script>
+    <script src="~/Scripts/kendo.all.min.js"></script>
+    <script src="~/Scripts/pako_deflate.min.js"></script>
+
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            //$('#table_id').DataTable({
+            //    responsive: true,
+            //    paging: false,
+            //    autoWidth: false,
+            //    "bInfo": false,
+            //    searching: false,
+            //    "columnDefs": [
+            //        { "width": "20px", "targets": 0 },
+            //        { "width": "40px", "targets": 1 },
+            //        { "width": "40px", "targets": 2 },
+            //        { className: 'text-center', targets: [0, 1, 2] },
+            //    ],
+            //});
+
+            $(document).on("click", ".k-radio", function () {
+                alert("test");
+          var Id =@Model.InvoiceID;
+          var ship ='@Model.Shipment';         
+            var pickup = $("#defaultPickup").is(':checked');
+                var delivery = $("#defaultDelivery").is(':checked');
+                var pickup1 = $("#engine1").is(':checked');
+                var delivery1 = $("#engine2").is(':checked');
+                
+            $.ajax({
+                url: '@Url.Action("SaveShipmentStatus", "Invoice")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ pikup: pickup1, del: delivery1, ID: Id }),
+                success: function (response) {
+                    response;                    
+                },
+                failure: function (response) {
+                    response;
+                }
+            });
+         });
+        });
+         kendo.pdf.defineFont({
+        "DejaVu Sans": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans.ttf",
+        "DejaVu Sans|Bold": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+        "DejaVu Sans|Bold|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "DejaVu Sans|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+        "WebComponentsIcons": "https://kendo.cdn.telerik.com/2017.1.223/styles/fonts/glyphs/WebComponentsIcons.ttf"
+         });
+        @*var id = "Invoice" + "@Model.InvoiceID";*@
+         var id = "WIS"+"@Model.InvoiceID";
+        function getPDF() {
+            kendo.drawing
+                .drawDOM($('#pdfDiv'), {
+                    paperSize: "a3", forcePageBreak: ".page-break", multiPage: true, landscape: false, Portrait: true,
+                    margin: { left: "2cm", top: "2cm", right: "2cm", bottom: "2cm" }
+                })
+                .then(function (group) {
+                    kendo.drawing.pdf.saveAs(group, /*id,*/id+ "_Delivery_Pickup Summary.pdf");
+                });             
+        }        
+        
+    </script>
+}

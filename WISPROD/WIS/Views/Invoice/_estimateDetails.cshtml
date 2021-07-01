@@ -1,0 +1,82 @@
+﻿
+@model IEnumerable<WISModels.EstimateDetailModel>
+@{
+    Layout = null;
+}
+<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/rowreorder/1.2.7/css/rowReorder.dataTables.min.css" rel="stylesheet" />
+<div class="table-responsive row col-md-12">
+    @Html.Hidden("EstimateDetails", Model)
+
+    <table id="itemtbl" class="table table-striped">
+        @{int SrNo1 = 0;}
+        <thead>
+            <tr>
+                <th></th>
+                <th>seq</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Unit Cost</th>
+                <th>Qty</th>
+                <th>CostCode/GLCode</th>
+                <th>Est CostCode</th>
+                <th>LineTotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    var result = item.EstimateDescription == null;
+
+                    <tr>
+                        <td>@item.EstimateDetailID</td>
+                        <td style="text-align:center;">@(SrNo1 += 1)</td>
+                        <td style="text-align:center;">@item.ItemInventoryID</td>
+                        @if (result == true)
+                        {
+                            <td>@item.NonInventoryItem</td>
+                        }
+                        else
+                        {
+                            <td>@item.EstimateDescription</td>
+                        }
+                        <td style="text-align:center;">$@string.Format("{0:#,0.00}", @item.ItemInventoryCost)</td>
+                        <td style="text-align:center;">@item.EstimateDetailQuantity</td>
+                        <td style="text-align:center;">@item.EstimateDetailCostCodeGL</td>
+                        <td style="text-align:center;">@item.EstimateDetailCostCodeNonLabor</td>
+                        <td style="text-align:center;">$@string.Format("{0:#,0.00}", @Math.Round(item.EstimateDetailLineItemTotal ?? 0, 2))</td>
+                        <td style="text-align:center;">
+                            <a href="#" class="btn btn-sm btn-success" onclick="EditEstimateDtl(@item.EstimateDetailID)"><i class="glyphicon glyphicon-pencil"></i></a>
+                            <a href="#" class="btn btn-sm btn-danger" onclick="DeleteEstimateDtl(@item.EstimateDetailID)"><i class="glyphicon glyphicon-trash"></i></a>
+                        </td>
+                    </tr>
+
+                }
+             }
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-md-3 col-md-offset-9">
+            Total Amount :<strong>$ @Math.Round(Model.Sum(p => p.EstimateDetailLineItemTotal) ?? 0, 2)</strong>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.7/js/dataTables.rowReorder.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.auto-complete.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.ui.autocomplete.scroll.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+
+
+    </script>
+}

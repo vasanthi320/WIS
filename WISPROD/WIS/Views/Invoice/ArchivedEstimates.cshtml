@@ -1,0 +1,101 @@
+﻿@model IEnumerable<WISModels.EstimateModel>
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+<br /><br />
+<h3 class="text-success"><strong>Archived Estimates</strong></h3>
+<style>
+    #invoice_id {
+        word-wrap: break-word;
+    }
+    table.table-striped thead tr th {
+        word-wrap: break-word;
+    }
+</style>
+
+<br /><br />
+<div>
+    @Html.HiddenFor(p => p.FirstOrDefault().Estimate)
+
+    @if (Model != null)
+    {
+        <div class="table-responsive">
+            <table id="estimate_id" class="table table-striped table-bordered table-condensed col-md-12">
+                <thead>
+                    <tr>
+                        <th>EstimateNumber</th>
+                        <th>ClientID</th>
+                        <th>Created By</th>
+                        @*<th>Description</th>*@
+                        <th>Estimate JobNumber</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>EstimateDate</th>
+                        <th>Vendor#</th>
+                        <th>Vendor InVoice#</th>                      
+                        <th>InvoiceNotes</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model.Where(k => k.Status == "Archived"))
+                        {
+                      <tr>
+                        <td>@item.EstimateNumber</td>
+                        <td>@item.ClientTypeID</td>
+                        <td>@item.CreatedUser</td>
+                        @*<td>@item.Description</td>*@
+                        <td>@item.client</td>
+                        <td>@item.Total</td>
+                        <td>@item.Status</td>
+                        <td>@item.EstimateDate.ToString("MM/dd/yyyy")</td>
+                        <td>@item.Vendor</td>
+                        <td>@item.EstimateVendor</td>                     
+                        <td>@item.EstimateNotes</td>
+                        <td>
+                            @Html.ActionLink("Details", "GetEstimateSummary", "Invoice", new { Estimate = item.Estimate }, new { @class = "btn btn-sm btn-success" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryEstimate", "Invoice", new {  Estimate = item.Estimate })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                            @Html.ActionLink("Edit", "EditEstimate", "Invoice", new { Estimate = item.Estimate }, new { @class = "btn btn-sm btn-primary" })
+                        </td>
+                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <h4>No Data</h4>
+    }
+</div>
+<br />
+@section scripts {
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#estimate_id').DataTable({
+                responsive: true,
+                paging: true,
+                pageLength: 100,
+                autoWidth: false,
+                "bInfo": true,
+                stateSave: true,  
+                searching: true,
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,263 @@
+﻿@model WISModels.InvoiceModel
+@{
+    ViewBag.Title = "Invoice Summary";
+
+}
+<br /><br /><br />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+@*<link href="~/Content/plugins/data Tables/jquery.orderable.min.css" rel="stylesheet" />*@
+<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/rowreorder/1.2.7/css/rowReorder.dataTables.min.css" rel="stylesheet" />
+
+<style>
+    td {
+        word-break: break-all;
+    }
+</style>
+<div class="row">
+    <div class="col-md-6" style="padding-left:20px">
+        <strong>
+            <span>
+                Hoar Construction Warehouse<br />
+                550 Belview Street<br />
+                Bessemer AL 35020
+            </span>
+        </strong>
+    </div>
+
+    <div class="col-md-6" style="padding-right:20px">
+        <img src="~/Content/img/HOAR_Logos_FINAL_Stacked Lockup_2 color.jpg" class="visible-lg  visible-md pull-right" style="width:20% ;height:20%" />
+    </div>
+</div>
+<br /> <br />
+<div>
+    @using (Html.BeginForm("SubmitInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "frmDetails1" }))
+    {
+        @Html.AntiForgeryToken()
+        if (Model != null)
+        {
+            var test = Math.Truncate(Math.Abs(@Model.InvoiceTotal.HasValue ? Model.InvoiceTotal.Value : 0)).ToString("####").Length;           
+            var Status = Model.InvoiceStatus;
+            @Html.HiddenFor(p => p.InvoiceID)
+            if (Model.InvoiceID > 0)
+            {
+                var job = Model.InvoiceJobNumber;
+                var external = Model.ExternalClientID;
+                if ((job == "NULL" || job == null) && (external == null))
+                {
+                    <div id="employee"><strong><label class="col-md-6">Employee:@Model.Employee</label></strong></div>
+                    <strong><span><label>@Model.Contact </label></span></strong>
+                }
+                else if ((external != null) && (job == "NULL" || job == null))
+                {
+                    <div id="External" class="col-md-6">
+                        <p>
+                            <strong><span><label>@ViewBag.EXternalClientName</label></span></strong><br />
+                            <strong><span><label>@ViewBag.Addres</label></span></strong><br />
+                            <strong><span><label>@ViewBag.city ,  @ViewBag.sts , @ViewBag.zp </label></span></strong><br />
+                            <strong><span><label>@Model.Contact </label></span></strong>
+                        </p>
+                    </div>
+                }
+                else if ((external == null) && (job != null || job != "NULL"))
+                {
+                    <div id="JobAddress" class="col-md-6">
+                        <p>
+                            <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                            <strong><span><label>@Model.Contact </label></span></strong>
+                        </p>
+                    </div>
+                }
+                else if ((external != null) && (job != null || job != "NULL"))
+                {
+                    <div id="JobAddress" class="col-md-6">
+                        <p>
+                            <strong><span><label>JOB @ViewBag.JobDes</label></span></strong><br />
+                            <strong><span calss="pull-left"><label>@ViewBag.MailAddress</label></span></strong><br />
+                            <strong><span><label>@ViewBag.MailCity   @ViewBag.MailState  @ViewBag.MailZip </label></span></strong><br />
+                            <strong><span><label>@Model.Contact </label></span></strong>
+                        </p>
+                    </div>
+                }
+                if (job == "NULL" || job == null)
+                {
+                    <div class="row" style="padding-left:25px">
+                        <div>
+                            <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Balance Due <span class="col-md-offset-1">$@Model.InvoiceTotal</span> </strong></span></b>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row" style="padding-left:25px">
+                        <div>
+                            <b><span><strong>Invoice#  <sapn class="col-md-offset-1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  WIS @Model.InvoiceID</sapn></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Invoice Date  <span class="col-md-offset-1">@Model.InvoiceDate.ToString("MM/dd/yyyy")</span></strong></span></b>
+                        </div>
+                        <div>
+                            <b><span><strong>Balance Due <span class="col-md-offset-1">$@Model.InvoiceTotal</span> </strong></span></b>
+                        </div>
+                    </div>
+                }
+            }
+            <br /><br /><br />
+            <div class="table-responsive">
+                <table id="table_id" class="table table-striped">
+                    @{int SrNo = 0;}
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>seq</th>
+                            <th>Item</th>
+                            <th>ItemNumber</th>
+                            <th>Description</th>
+                            <th>Unit Cost</th>
+                            <th>CostCode/GLCode</th>
+                            <th>Inv CostCode</th>
+                            <th>Quantity</th>
+                            <th>Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            foreach (var item in Model.InvoiceDetails)
+                            {
+                                var result = item.ItemInventoryDescription == null;
+                        <tr>
+                            <td>@item.InvoiceDetailID</td>                            
+                            <td>
+                                <input type="checkbox" id="check1" class="k-checkbox" @*checked="checked"*@>
+                                <label class="k-checkbox-label" for="check1"></label>
+                            </td>
+                            <td>@(SrNo += 1)</td>
+                            <td>@item.ItemInventoryID</td>
+                            <td>@item.ItemInventoryNumber</td>
+                            @if (result == true)
+                            {
+                                <td>@item.NonInventoryItem</td>
+                            }
+                            else
+                            {
+                                <td style=" word-break: break-all;">@item.ItemInventoryDescription</td>
+                            }
+                            <td>$@string.Format("{0:#,0.00}", @item.ItemInventoryUnitCost)</td>
+                            <td>@item.InvoiceDetailCostCodeGL</td>
+                            <td>@item.InvoiceDetailCostCodeNonLabor</td>
+                            <td style="text-align:center; width:25px">@item.InvoiceDetailQuantity</td>
+                            <td>$@string.Format("{0:#,0.00}", @item.InvoiceDetailLineItemTotal)</td>
+                        </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            <br />
+
+            <div>
+                <table class="col-md-offset-10">
+                    <tr>
+                        <td style="text-align:right;"><strong> Balance Due</strong></td>
+                        <td style="text-align:right;padding-left:25px"><strong>$@string.Format("{0:#,0.00}", Model.InvoiceTotal)</strong></td>
+                    </tr>
+                </table>
+            </div>
+            <br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br />
+            <div span class="col-md-offset-1 col-sm-offset-1">
+                <div class="row">
+                    Terms: <strong>@Model.DefaultValue</strong>
+                </div>
+                <br /><br />
+                <div class="row">
+                    Notes:<strong>@Model.InvoiceNotes</strong>
+                </div>
+            </div>
+        }
+    }
+</div>
+@section scripts{
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.7/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            var table = $('#table_id').DataTable({
+                responsive: true,
+                paging: false,
+                autoWidth: false,
+                rowReorder: true,               
+                destroy: true,
+                "ordering": false,
+                "bInfo": false,
+                searching: false,
+                "columnDefs": [
+                    { "width": "35px", "targets": 0 },
+                    { "width": "20px", "targets": 1 },
+                    { "width": "10px", "targets": 2 },
+                    { "width": "35px", "targets": 3 },
+                    { "width": "45px", "targets": 4 },
+                    { "width": "15px", "targets": 5 },
+                    { "width": "20px", "targets": 6 },
+                    { "width": "20px", "targets": 7 },
+                    { "width": "20px", "targets": 8 },
+                    { "width": "20px", "targets": 9 },
+                    { "width": "20px", "targets": 10 },
+                    { className: 'text-right', targets: [2, 6] },
+                    { className: 'text-center', targets: [0, 1, 3, 4, 5, 7, 8, 9,10] },
+                    {
+                        "targets": [0],
+                        "visible": false
+                    }
+                ],
+
+            });
+            $('#table_id').on('row-reorder.dt', function (dragEvent, data, nodes) {
+                var InvId = $("#InvoiceID").val();
+                for (var i = 0, ien = data.length; i < ien; i++) {
+                    var rowData = table.row(data[i].node).data();
+                    $.ajax({
+                        type: "GET",
+                        cache: false,
+                        contentType: "application/json; charset=utf-8",
+                        url: '/Invoice/UpdateInvoiceRowInfo',                        
+                        data: { Id: rowData[0], fromPosition: data[i].newPosition, toPosition: data[i].oldPosition },                        
+                        contentType: "application/json",
+                        success: function (result) {
+                            setInterval('refreshPage()', 5000);
+                             //location.href = '@Url.Action("GetInvoiceSummary", "Invoice")' +"?InvoiceId=" + InvId
+                    },
+                    error: function (xhr) {
+                        console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                    }
+                    });
+                }
+            });
+        });
+
+        function refreshPage() {
+            location.reload(true);
+        }
+      
+    </script>
+}

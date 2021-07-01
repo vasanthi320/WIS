@@ -1,0 +1,35 @@
+﻿@model IList<WISModels.InvoiceModel>
+
+@{
+    Layout = "~/Views/Shared/_PopupLayout.cshtml";
+}
+<div class="col-md-6">
+    <div class="panel panel-primary">
+        <div class="panel-heading"> Current GL#Recovery </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-8">
+                    @if (Model != null)
+                    {                     
+                    <div class="in-line"><a class="underline" target="_blank" id="GLCode" href=" @Url.Action("GetGL1CodeInvoiceSummary", "Report")">#CW29200.000.000070</a> -$@ViewBag.GL1Total out of $2650.00</div>
+                        <div class="in-line"><a class="underline" target="_blank" id="GLCode" href=" @Url.Action("GetGL2CodeInvoiceSummary", "Report")">#BM29200.000.000050</a> -$@ViewBag.GL2Total out of $500.00</div>
+                      
+                        <br />
+                        if (User.IsInRole("WIS-LaborRecovery"))
+                        {
+                            <a href="http://sql-1/Reports/Pages/Report.aspx?ItemPath=%2fVCS%2fCustom%2fPR%2fWarehouse+Employee+Recovery" target="_blank"> Labor Recovery Report</a>
+                        }
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+

@@ -1,0 +1,83 @@
+﻿@model IEnumerable<WISModels.InvoiceModel>
+@{
+    ViewBag.Title = "Archived GL'S Summary";
+    @ViewBag.GL1Total;
+    @ViewBag.GL2Total;
+   
+}
+<div class="col-md-6 row pull-left">
+    <div class="col-md-5">
+        <div class="panel panel-primary">
+            <div class="panel-heading">Monthly GL# Recovery </div>
+            <div class="panel-body" id="panelbody1">
+                <ul class="list-group" id="lstgroup">
+                    @if (Model != null)
+                     {
+                        foreach (var item in Model)
+                        {
+                            @*<li class="list-group-item"><a class="underline"  href="@Url.Action("MonthGLInvSummary", "Invoice", new {  InvoiceMonth = item.Month,Invoiceyear=item.Year })">@item.MonthName&nbsp;@DateTime.Now.Year.ToString()</a></li>*@
+                           <li class="list-group-item"><a class="underline" href="#"onclick="javascript:GLCodeMonthInvSummary('@item.Month','@item.Year')">@item.MonthName&nbsp;@DateTime.Now.Year.ToString()</a></li>
+                            
+                        }
+                     }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divDetails" class="col-md-6 pull-right">    
+        <div class="panel panel-primary">
+            <div class="panel-heading"> Current GL Monthly#Recovery</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="in-line"><a class="underline" id="GLCODE1" href="javascript:void(0);">#CB29200.000.000030</a> -$@ViewBag.GLCBTotal</div>
+                    <div class="in-line"><a class="underline" id="GLCODE2" href="javascript:void(0);">#CW29200.000.000070</a> -$@TempData["GL1Total"]</div>
+                    <div class="in-line"><a class="underline" id="GLCODE3" href="javascript:void(0);">#BM29200.000.000050</a> -$@ViewBag.GL2Total</div>
+
+                </div>
+            </div>
+        </div>
+    
+
+</div>
+@section scripts {
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $("#divDetails").hide();
+            $(".list - group - item").click(function () {
+
+            })
+            });
+
+        function GLCodeMonthInvSummary(Mon, Yer) {
+            var loadurl = '@Url.Action("MonthGLInvSummary", "Invoice")' + "?InvoiceMonth=" + Mon + "&Invoiceyear=" + Yer;
+          
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: { InvoiceMonth: Mon, Invoiceyear:Yer,},
+                success: function (result, textStatus, jqXHR) {
+                    $("#divDetails").show();
+                    $("#divDetails").html(result);                    
+                },
+                error: function (xhr) {
+                    console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                }
+            });
+        }
+
+    </script>
+}
+
+
+
+

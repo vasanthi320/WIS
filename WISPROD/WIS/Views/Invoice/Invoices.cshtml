@@ -1,0 +1,331 @@
+﻿@model IEnumerable<WISModels.InvoiceModel>
+@using WISServiceLayer
+
+@{
+    ViewBag.Title = "Invoices";
+}
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+<br /><br />
+<h2 class="row left">Invoices</h2>
+<div class="row pull-right">
+    <button id="AddButtonId" class="btn btn-success" onclick="javascript:NewInvoice()">NewInvoice&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+</div>
+<style>
+    #invoice_id {
+        word-wrap: break-word;
+    }
+
+    table.table-striped thead tr th {
+        word-wrap: break-word;
+    }
+</style>
+
+<br /><br />
+<div>
+    @Html.HiddenFor(p => p.FirstOrDefault().InvoiceID)
+    <h4 class="text-success"><strong>Save Draft</strong></h4>
+    @if (Model != null)
+    {
+        <button id="AddButtonId" class="btn btn-sm btn-primary col-md-offset-6" onclick="javascript:DraftedInvtoCompl()">Drafted To Completed&nbsp;</button>
+        <button id="AddButtonId" class="btn btn-sm btn-primary col-md-offset-6" style="margin:20px" onclick="javascript:ArchiveInvoices()">Archive Invoices&nbsp;</button>
+        <button type="button" id="DeleteBtnId" class="btn btn-sm btn-primary" style="margin:20px" onclick="javascript:DeleteInvoice()">Delete&nbsp;</button>
+        //<button type="button" id="pickTicketBtnId" class="btn btn-sm btn-primary" style="margin:20px" onclick="javascript:PickTicket()">Pic Ticket&nbsp;</button>
+        <div class="table-responsive">
+            <table id="invoice_id" class="table table-striped table-bordered table-condensed col-md-12">
+                <thead>
+                    <tr>
+                        <th>
+                            SelectAll
+                            @Html.CheckBox("a", new { @class = "", id = "select_allDrafted" })
+                        </th>
+                        <th>InvoiceNumber</th>
+                        <th>Date</th>
+                        @*<th>ClientID</th>*@
+                        <th>Created By</th>
+                        <th>InvoiceJobNumber</th>
+                        <th>Vendor#</th>
+                        <th>Vendor InVoice#</th>
+                        <th>Total</th>                        
+                        <th>InvoiceNotes</th>
+                        <th>Status</th>
+                        <th>Check</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model.Where(k => k.InvoiceStatus == "Drafted"))
+                        {
+                            var jobnu = @item.InvoiceJobNumber;
+                    <tr>
+                        <td>@Html.CheckBox("a", new { @class = "dt-checkboxes", value = item.InvoiceID, sta = item.InvoiceDate })</td>
+                        <td>@item.InvoiceNumber</td>
+                        <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
+                        @*<td>@item.ClientTypeID</td>*@
+                        <td>@item.CreatedUser</td>
+                        @if (jobnu != null && jobnu != "NULL")
+                        {
+                            <td>@item.InvoiceJobNumber</td>
+                        }
+                        else
+                        {
+                            <td>@item.ExternalClientFirstName</td>
+                        }
+                        <td>@item.Vendor</td>
+                        <td>@item.InvoiceVendor</td>
+                        <td>$@string.Format("{0:#,0.00}", @item.InvoiceTotal)</td>
+                        <td>@item.InvoiceNotes</td>
+                        <td>@item.InvoiceStatus</td>
+                        <td>@Html.CheckBox("a", new { @class = "dt-checkboxes2" })</td>
+                        <td>
+                            @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                            @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("pickupTicketSummaryInv", "Invoice", new {  InvoiceId = item.InvoiceID })'><span><i class="fa fa-truck" style="font-size:20px"></i></span></a>
+                        </td>
+                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <h4>No Data</h4>
+    }
+</div>
+<br />
+<div>
+    <h4 class="text-success"><strong>Completed</strong></h4>
+    <br />
+    @if (Model != null)
+    {
+        <div class="table-responsive">
+            <table id="Comptinvoice_id" class="table table-striped table-bordered table-condensed col-md-12">
+                <thead>
+                    <tr>
+                        <th>
+                            SelectAll
+                            @Html.CheckBox("a", new { @class = "", id = "select_all1" })
+                        </th>
+                        <th>Invoice Number</th>
+                        <th>Date</th>
+                        <th>Created By</th>
+                        <th>Invoice JobNumber</th>
+                        <th>Vendor#</th>
+                        <th>Vendor InVoice#</th>
+                        <th>Total</th>
+                        <th>InvoiceTerms</th>
+                        <th>InvoiceNotes</th>
+                        <th>Status</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+
+                        foreach (var item in Model.Where(k => k.InvoiceStatus == "Completed" && k.IsDeleted == 0))
+                        {
+                            var jobnu = @item.InvoiceJobNumber;
+                    <tr>
+                        <td>@Html.CheckBox("a", new { @class = "dt-checkboxes1", value = item.InvoiceID, sta = item.InvoiceDate })</td>
+                        <td>@item.InvoiceNumber</td>
+                        <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
+                        <td>@item.CreatedUser</td>
+                        @if (jobnu != null && jobnu != "NULL")
+                        {
+                            <td>@item.InvoiceJobNumber</td>
+                        }
+                        else
+                        {
+                            <td>@item.ExternalClientFirstName</td>
+                        }
+                        <td>@item.Vendor</td>
+                        <td>@item.InvoiceVendor</td>
+                        <td>$@string.Format("{0:#,0.00}", @item.InvoiceTotal)</td>
+                        <td>@item.DefaultValue</td>
+                        <td>@item.InvoiceNotes</td>
+                        <td>@item.InvoiceStatus</td>
+                        <td>@Html.CheckBox("a", new { @class = "dt-checkboxes2"})</td>
+                        <td>
+                            @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                            @Html.ActionLink("Edit", "EditInvoice", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-primary" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("pickupTicketSummaryInv", "Invoice", new {  InvoiceId = item.InvoiceID })'><span><i class="fa fa-truck" style="font-size:20px"></i></span></a>
+                        </td>
+                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    }
+    else
+    {
+        <h4>No Data</h4>
+    }
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog vertical-align-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Add New Invoice</h4>
+            </div>
+            <div id="divbody" class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#invoice_id').DataTable({
+                responsive: true,
+                paging: true,
+                autoWidth: false,
+                "bInfo": false,
+                searching: true,
+            });
+            $('#Comptinvoice_id').DataTable({
+                responsive: true,
+                paging: true,
+                pageLength: 200,
+                autoWidth: false,
+                "bInfo": false,
+                "aaSorting": [[1,"desc"]],
+                searching: true,
+            });
+            $('.Datepicker').datepicker("setDate", new Date());
+            $('.Datepicker').datepicker();
+            //To select all checkboxes
+            $("#select_all1").click(function () {
+                $(".dt-checkboxes1").each(function (index) {
+                    var checked = $("#select_all1").prop('checked');
+                    var tarvalue = this.getAttribute('sta')
+                    var d = new Date();
+                    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    var firstDay =
+                        new Date(d.getFullYear(), d.getMonth(), 1);
+                    var Month1 = months[d.getMonth()];
+                    var date = d.getDate();
+                    var month = d.getMonth() + 1;
+                    var year = d.getFullYear();
+                 
+                   
+                    //function getFormattedDate() {
+                        var d = new Date();
+                       // let year1 = d.getFullYear();
+                        //let month = (1 + d.getMonth()).toString().padStart(2, '0');
+                        let day = d.getDate().toString().padStart(2, '0');
+                        var result = month + '/' + day + '/' + year;
+                    //    return month + '/' + day + '/' + year;
+                    //}
+                    let ds = new Date(tarvalue); //dd-mm-yyyy
+                    let year1 = ds.getFullYear();
+                    var res = ds.getMonth() + 1;
+                    var targetdate = ds.getDate();
+                    if (res != 12) {
+                        if ((tarvalue < result) && (res < month)) {
+                        //if ((targetdate < date) && (res < month)) {
+                            $(this).prop('checked', checked)
+                        } else {
+                            $(this).prop('checked', false);
+                        }
+                    }
+                    else if(res=12) {
+                        if ((year1 < year)) {
+                            $(this).prop('checked', checked)
+                        } else {
+                            $(this).prop('checked', false);
+                        }
+                    }
+                    //$(".dt-checkboxes").prop('checked', $(this).prop('checked'));
+                })
+            });
+        });
+
+        function NewInvoice() {
+   var loadurl = '@Url.Action("AddnewInvoice", "Invoice")';
+            location.href = loadurl;
+        }
+        function DraftedInvtoCompl() {
+            var drafts = [];
+            $('#invoice_id').find('.dt-checkboxes:checked').each(function (i) {
+                drafts[i] = $(this).val();
+            });
+             if (confirm('Are you sure you want to movice Invoices to completed status?')) {
+                    jQuery.ajax({
+                        url: '@Url.Action("InvMovetoComplete", "Invoice")',
+                        method: 'Post',
+                        data: { MoveInvoices: drafts }
+                    }).done(function (response) {
+                        window.location = '@Url.Action("Invoices", "Invoice")';
+                    }).fail(function () {
+                    });
+                }
+        }
+        function ArchiveInvoices() {
+            var colors = [];
+            $('#Comptinvoice_id').find('.dt-checkboxes1:checked').each(function (i) {
+                colors[i] = $(this).val();
+            });
+            var d = new Date();
+            var n = d.getMonth();
+            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var Month = months[d.getMonth()];
+                if (confirm('Are you sure you want to archive Invoices?')) {
+                    jQuery.ajax({
+                        url: '@Url.Action("ArchiveMonthInvoices", "Invoice")',
+                        method: 'Post',
+                        data: { ArchInvoices: colors }
+                    }).done(function (response) {
+                        window.location = '@Url.Action("Invoices", "Invoice")';
+                    }).fail(function () {
+                    });
+                }
+        }
+        function DeleteInvoice() {
+            var colors = [];
+            $('#Comptinvoice_id').find('.dt-checkboxes:checked').each(function (i) {
+                colors[i] = $(this).val();
+            });
+            if (colors.length > 0) {
+                if (confirm('Are you sure you want to Delete Invoices?')) {
+                    jQuery.ajax({
+                        url: '@Url.Action("DeleteInvs", "Invoice")',
+                        method: 'Post',
+                        data: { DelInv: colors }
+                    }).done(function (response) {
+                        window.location = '@Url.Action("Invoices", "Invoice")';
+                    }).fail(function () {
+                    });
+                }
+            } else {
+                alert("Select atleast one to Delete");
+            }
+        }
+    </script>
+}

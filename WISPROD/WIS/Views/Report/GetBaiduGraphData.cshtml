@@ -1,0 +1,102 @@
+﻿@model IEnumerable<WISModels.InvoiceModel>
+@{
+    ViewBag.Title = "Graph Data";
+    
+}
+<link href="~/Content/plugins/data Tables/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/plugins/data Tables/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<br /><br />
+
+<style>
+    #invoice_id {
+        word-wrap: break-word;
+    }
+
+    table.table-striped thead tr th {
+        word-wrap: break-word;
+    }
+</style>
+
+<br /><br />
+<div>
+    @Html.HiddenFor(p => p.FirstOrDefault().InvoiceID)
+    <h4 class="text-success"><strong>Completed Invoices</strong></h4>
+    @if (Model != null)
+    {        
+        <div class="table-responsive">
+            <table id="Baiduinvoice_id" class="table table-striped table-bordered table-condensed col-md-12">
+                <thead>
+                    <tr>                       
+                        <th>Invoice Number</th>
+                        <th>Date</th>
+                        <th>ClientID</th>
+                        <th>Invoice JobNumber</th>
+                        <th>Vendor#</th>
+                        <th>Vendor InVoice#</th>
+                        <th>Total</th>
+                        <th>Invoice Notes</th>
+                        <th>Status</th>   
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model.Where(k => k.InvoiceStatus == "Completed"||k.InvoiceStatus=="Archived"))
+                        {
+                    <tr>
+                        <td>@item.InvoiceNumber</td>
+                        <td>@item.InvoiceDate.ToString("MM/dd/yyyy")</td>
+                        <td>@item.ClientTypeID</td>
+                        <td>@item.InvoiceJobNumber</td>
+                        <td>@item.Vendor</td>
+                        <td>@item.InvoiceVendor</td>
+                        <td>@item.InvoiceTotal</td>
+                        <td>@item.InvoiceNotes</td>
+                        <td>@item.InvoiceStatus</td>
+                        <td>
+                            @Html.ActionLink("Details", "GetInvoiceSummary", "Invoice", new { InvoiceId = item.InvoiceID }, new { @class = "btn btn-sm btn-success" })
+                            <a class="btn btn-primary" target="_blank" href='@Url.Action("PrintSummaryInvoice", "Invoice", new {  InvoiceId = item.InvoiceID })'><span class="glyphicon glyphicon-print" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <h4>No Data</h4>
+    }
+</div>
+<br />
+@section scripts {
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
+
+
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#Baiduinvoice_id').DataTable({
+                responsive: true,
+                paging: true,
+                autoWidth: false,
+                "bInfo": false,
+                searching: true,
+            });
+      
+       
+    </script>
+}
+
+

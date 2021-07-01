@@ -1,0 +1,56 @@
+﻿@model IList<WISModels.InvoiceModel>   
+@{
+    Layout = null;
+
+}
+<div class="col-md-6">
+    <div class="panel panel-primary">
+        <div class="panel-heading">GL Monthly#Recovery</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    @if (Model != null)
+                    {
+                    <div class="in-line"><a class="underline" href="@Url.Action("GLMth", "Invoice",new {  Month = Model.FirstOrDefault().InvoiceDate.Month,Year= Model.FirstOrDefault().InvoiceDate.Year,GL="CB29200.000.000030"})">#CB29200.000.000030</a>-$@ViewBag.GLCBTotal  </div>
+                    <div class="in-line"><a class="underline" href="@Url.Action("GLMth", "Invoice",new {  Month = Model.FirstOrDefault().InvoiceDate.Month,Year= Model.FirstOrDefault().InvoiceDate.Year,GL="CW29200.000.000070"})">#CW29200.000.000070</a>-$@ViewBag.GLCWTotal  </div>
+                    <div class="in-line"><a class="underline" id="#GLcode1" href="@Url.Action("GLMth", "Invoice",new {  Month = Model.FirstOrDefault().InvoiceDate.Month,Year= Model.FirstOrDefault().InvoiceDate.Year,GL="BM29200.000.000050"})">#BM29200.000.000050</a>-$@ViewBag.GL2Total </div>
+                     
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js></script>
+    <script type="text/javascript" src=https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js></script>
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script language="javascript" type="text/javascript">
+        function GLCodeMonthInvSummary(Mon, Yer) {
+            var loadurl = '@Url.Action("MonthGLInvSummary", "Invoice")' + "?InvoiceMonth=" + Mon + "&Invoiceyear=" + Yer;
+
+            $.ajax(loadurl, {
+                type: "Post",
+                cache: false,
+                data: { InvoiceMonth: Mon, Invoiceyear:Yer,},
+                success: function (result, textStatus, jqXHR) {
+                    $("#divDetails").show();
+                    $("#divDetails").html(result);   
+                },
+                error: function (xhr) {
+                    console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                }
+            });
+        }
+    </script>
+}
+
+
+
+

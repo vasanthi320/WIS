@@ -1,0 +1,139 @@
+﻿@model WISModels.EstimateDetailModel
+@{
+    Layout = null;
+}
+<link href="~/Content/plugins/autocomplete/jquery.auto-complete.min.css" rel="stylesheet" />
+<link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet" />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    @Html.HiddenFor(p => p.EstimateDetailID)
+    @Html.HiddenFor(p => p.EstimateDetailQuantity)
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">Inventory</label>
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.Inventory, ViewBag.Inventory as IEnumerable<SelectListItem>, "--Yes--", new { Class = "form-control", @onchange = "javaScript:InventoryDtls();" })
+            @Html.ValidationMessageFor(model => model.Inventory, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group" id="Categorydiv">
+        <label class="control-label col-xs-4 ">Category</label>
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.ItemCategoryID, ViewBag.Category as IEnumerable<SelectListItem>, "--Select--", new { Class = "form-control",  onchange = "javaScript:GetItemInventoryList()" })
+            @Html.ValidationMessageFor(model => model.ItemCategoryID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group" id="itmdiv">
+        <label class="control-label col-xs-4 ">Estimate Item</label>
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.ItemInventoryID, Enumerable.Empty<SelectListItem>(), "--Select--", new { Class = "form-control", @onchange = "javascript:GetExisProdDetails();" })
+            @Html.ValidationMessageFor(model => model.ItemInventoryID, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.EstimateDescription, new { @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group" id="inventorydiv" style="display:none">
+        <label class="control-label col-xs-4 ">NonInventoryItem</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.NonInventoryItem, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.NonInventoryItem, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.NonInventoryItem, new { @class = "form-control" })
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.Categories)
+    <div>
+        @Html.HiddenFor(m => m.ItemInventoryID)
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">Cost Code/GL</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.EstimateDetailCostCodeGL, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.EstimateDetailCostCodeGL, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">Estimate Code</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.EstimateDetailCostCodeNonLabor, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.EstimateDetailCostCodeNonLabor, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">ItemInventoryCost</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.ItemInventoryCost, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.ItemInventoryCost, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">Estimate Quantity</label>
+        <div class="col-md-8">
+            @Html.Hidden("prePrice", Model.EstimateDetailQuantity)
+            @Html.TextBoxFor(model => model.EstimateDetailQuantity, new { @class = "form-control", onchange = "javascript:PopulateItmTotal()", id = "EstimateQuantity" })
+            @Html.ValidationMessageFor(model => model.EstimateDetailQuantity, "", new { @class = "text-danger" })
+            Available Quantity:<span id="currentqty">@Model.EstimateDetailQuantity</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-4 ">Estimate Total</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.EstimateDetailLineItemTotal, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.EstimateDetailLineItemTotal, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="modal-footer" id="footer">
+        <button class="btn btn-primary" id="btnSave" data-dismiss="modal" type="button" onclick="SaveEstimateItem();">Save</button>
+        <button class="btn btn-primary" id="btnclose" data-dismiss="modal" type="button">Close</button>
+    </div>
+    <div class="modal-footer" id="footer1" style="display:none">
+        <button class="btn btn-primary" id="btnSave" data-dismiss="modal" type="button" onclick="SaveEstimateItem1();">Save</button>
+        <button class="btn btn-primary" id="btnclose" data-dismiss="modal" type="button">Close</button>
+    </div>
+</div>
+}
+
+@section scripts{
+
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.auto-complete.min.js"></script>
+    <script src="~/Content/plugins/autocomplete/jquery.ui.autocomplete.scroll.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#ItemInventoryDescription").autocomplete({
+                source: function (request, response) {
+                    debugger;
+                    $.ajax({
+                        url: "/Invoice/GetCategories",
+                        type: "POST",
+                        dataType: "json",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.ItemCategoryDescription, value: item.ItemCategoryDescription };
+                            }))
+                        }
+                    })
+                },
+                minLength: 3,
+                maxShowItems: 8,
+                select: function (event, ui) {
+
+                }
+            });
+        });
+
+    </script>
+}
+
